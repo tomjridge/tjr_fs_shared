@@ -1,7 +1,7 @@
 set -a # export all vars
 #set -x # debug
 
-libname="tjr_fs_common"
+libname="tjr_fs_shared"
 required_packages="batteries" 
 description="Shared definitions for filesystem work"
 
