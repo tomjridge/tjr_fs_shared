@@ -1,6 +1,0 @@
-name="tjr_fs_shared"
-description="Shared definitions for filesystem work"
-version="2018-04-18"
-requires="batteries"
-archive(byte)="tjr_fs_shared.cma"
-archive(native)="tjr_fs_shared.cmxa"
