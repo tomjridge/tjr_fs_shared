@@ -8,4 +8,4 @@ let fd_from_file ~fn ~create ~init = Unix.(
 (* FIXME this isn't doign much *)
 
 (** The missing function to read a file and return a string. *)
-let read_file fn = (BatPervasives.input_file fn)
+let read_file fn = Tjr_file.read_file fn
