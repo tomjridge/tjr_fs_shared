@@ -5,7 +5,7 @@ let fd_from_file ~fn ~create ~init = Unix.(
     openfile fn flgs 0o640 
     |> (fun fd -> (if init then ftruncate fd 0 else ()) |> (fun _ -> fd))
   )
-(* FIXME this isn't doign much *)
+(* FIXME this isn't doing much *)
 
 (** The missing function to read a file and return a string. *)
 let read_file fn = Tjr_file.read_file fn
