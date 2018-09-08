@@ -1,5 +1,13 @@
-all:
+build:
 	$(MAKE) -C src
+
+
+install:
+	$(MAKE) -C src install
+
+
+uninstall:
+	$(MAKE) -C src uninstall
 
 
 clean:
