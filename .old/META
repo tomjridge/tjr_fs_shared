@@ -1,0 +1,6 @@
+name="tjr_fs_shared"
+description="Shared definitions for filesystem work"
+version="2018-06-08"
+requires="tjr_lib"
+archive(byte)="tjr_fs_shared.cma"
+archive(native)="tjr_fs_shared.cmxa"

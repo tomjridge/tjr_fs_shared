@@ -7,3 +7,6 @@
 *.a
 /META
 /src/META
+_build/
+/src/.merlin
+/tjr_fs_shared.install
