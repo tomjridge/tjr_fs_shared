@@ -13,6 +13,6 @@ depends: [ "tjr_lib" ]
 # ----------------------------------------------------------------------
 
 build: [
-  ["dune" "subst"] {pinned}
+#  ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
 ]
