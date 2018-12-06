@@ -35,5 +35,14 @@ let warn s =
 
 (* exit_hook -------------------------------------------------------- *)
 
-let at_exit ~print = 
-  Pervasives.at_exit (fun _ -> if print then print_last_n () else ())
+
+let print_at_exit = 
+  Global.register 
+    ~name:(__MODULE__^".print_at_exit")
+    (ref false)
+
+let at_exit ~print =
+  print_at_exit:=print
+
+let _ = 
+  Pervasives.at_exit (fun _ -> if !print_at_exit then print_last_n () else ())
