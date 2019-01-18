@@ -1,0 +1,16 @@
+-*- org -*-
+
+* tjr_fs_shared
+
+Shared definitions for filesystem work.
+
+
+* Dependencies
+
+opam: 
+
+tjr:
+| tjr_lib     | common lib |
+| tjr_monad   | common lib |
+| tjr_polymap | common lib |
+
