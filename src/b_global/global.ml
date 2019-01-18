@@ -1,4 +1,4 @@
-(** Keep track of state eg config, bool vars etc etc *)
+(** A global state manager which Keeps track of eg config, bool vars etc *)
 
 (** This flag, if true, forces names of global vars to be printed when
    registered *)

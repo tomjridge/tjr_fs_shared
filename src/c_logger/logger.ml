@@ -1,5 +1,7 @@
 (** A global logger. *)
 
+(* NOTE tjr_log is from tjr_lib *)
+
 let dest_Some x = match x with | Some x -> x | None -> failwith __LOC__
 
 let logger : Tjr_log.log_ops option ref = 
@@ -8,10 +10,6 @@ let logger : Tjr_log.log_ops option ref =
 
 
 (* logging --------------------------------------------------------- *)
-
-(* FIXME logging should be elsewhere *)
-
-(* let log' s = (dest_Some !logger).log s *)
 
 let log s = (dest_Some !logger).log s 
 

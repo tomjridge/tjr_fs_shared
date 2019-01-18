@@ -3,3 +3,4 @@
   (public_name tjr_fs_shared)
   (libraries tjr_lib tjr_monad tjr_polymap))  ; we include monad and polymap so we don't have to explicitly depend on them in later packages
 
+(include_subdirs unqualified)
