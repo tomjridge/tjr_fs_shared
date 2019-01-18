@@ -1,6 +1,8 @@
 (library
   (name tjr_fs_shared)
   (public_name tjr_fs_shared)
+  (preprocess (pps ppx_deriving_yojson ppx_bin_prot))
+  (flags (:standard "-w" "-39"))  ; -27 is unused var, -39 is unused rec flag
   (libraries tjr_lib tjr_monad tjr_polymap))  ; we include monad and polymap so we don't have to explicitly depend on them in later packages
 
 (include_subdirs unqualified)
