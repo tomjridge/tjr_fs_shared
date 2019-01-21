@@ -1,6 +1,6 @@
 (** A summary of the main types provided by this package. *)
 
-(** {0 Types } *)
+(** {2 Types } *)
 
 include Blk_dev_ops_type
 
@@ -19,11 +19,11 @@ type ss = Small_string.ss
 
 
 
-(** {0 Implementations} *)
+(** {2 Implementations} *)
 
 (** Note the following implementations:
 
-- {!Blk_dev_in_mem}, {!Blk_dev_on_fd}, {!Block_ops.make_string_block_ops}
+- {!Blk_dev_in_mem}, {!Blk_dev_on_fd}, {!Block_ops.String_block_ops}
 - {!Kv_op.default_kvop_map_ops}
 
 

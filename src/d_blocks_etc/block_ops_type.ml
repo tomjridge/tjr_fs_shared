@@ -2,10 +2,15 @@
 
 open Blk_sz_type
 
+
+
 (** NOTE since blk_sz is expected to be fixed for a given blk type, we
-   don't include as a parameter on the main interface methods *)
+   don't include as a parameter on the main interface methods 
+
+FIXME get_blk_sz should be just blk_sz?
+*)
 type 'blk block_ops = {
-  get_blk_sz: unit -> blk_sz; 
+  blk_sz: blk_sz; 
 
   of_string: string -> 'blk;
   to_string: 'blk -> string;
