@@ -1,6 +1,13 @@
-(** Strings with <= 256 bytes, used as keys in maps *)
-module SS : sig
+(** Strings with <= 256 bytes, used as keys in maps. 
+
+Really only for testing.
+ *)
+
+
+module Internal_ss : sig
+  (** The type of small strings *)
   type ss [@@deriving bin_io, yojson]
+  (** For this type, max_length is 256 *)
   val max_length: int
   val to_string: ss -> string
   val of_string: string -> ss
@@ -10,13 +17,13 @@ end = struct
   type ss = string [@@deriving bin_io, yojson]
   let max_length = 256 
   let to_string x = x
-  let of_string x = (
-    Test.test(fun () -> assert (String.length x <= max_length));
-    x)
+  let of_string x = 
+    assert (String.length x <= max_length);
+    x
   let compare: ss -> ss -> int = Pervasives.compare
 end
 
-include SS
+include Internal_ss
 
 
 

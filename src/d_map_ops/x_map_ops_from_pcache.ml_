@@ -4,4 +4,6 @@ type ('k,'v,'t) map_ops = {
   find: 'k -> ('v option,'t) m;
   insert: 'k -> 'v -> (unit,'t) m;
   delete: 'k -> (unit,'t)m;
+  insert_many: 'k -> 'v -> ('k*'v) list -> (('k*'v)list,'t) m
+
 }
