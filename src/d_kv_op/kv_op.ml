@@ -7,6 +7,11 @@ let op2k = function
 
 (* let op2s op = op |> op_to_yojson |> Yojson.Safe.pretty_to_string  *)
 
+let ii_op2s (op:(int,int)op) = 
+  op 
+  |> op_to_yojson (fun (i:int) -> `Int i) (fun (i:int) -> `Int i) 
+  |> Yojson.Safe.pretty_to_string 
+
 
 
 (** The type for the abstract view of the DCL. Also required by the
