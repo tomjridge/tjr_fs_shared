@@ -1,5 +1,37 @@
 (** A summary of the main types provided by this package. *)
 
+(** {2 Directory structure} 
+
+{[
+./src/b_global
+     global.ml
+./src/c_logger
+     logger.ml
+./src/c_test
+     test.ml
+./src/d_blocks_etc
+     blk_dev_in_mem.ml
+     blk_dev_on_fd.ml
+     blk_dev_ops_type.ml
+     blk_sz_type.ml
+     block_ops.ml
+     block_ops_type.ml
+./src/d_fun_store_passing_monad
+     store_passing.ml
+./src/d_kv_op
+     kv_op.ml
+     kv_op_type.ml
+./src/d_map_ops
+     map_ops.ml
+     map_ops_type.ml
+./src/d_small_string
+     small_string.ml
+./src
+     tjr_fs_shared_doc.ml
+]}
+
+*)
+
 (** {2 Types } *)
 
 include Blk_dev_ops_type

@@ -11,10 +11,10 @@ clean:
 	$(DUNE) clean
 
 
-doc: FORCE
+docs: FORCE
 	$(DUNE) build @doc
-	rm -rf /tmp/tjr_fs_shared
-	cp -R _build/default/_doc/_html /tmp/tjr_fs_shared  # so we don't lose it on clean
+	rm -rf docs/tjr_fs_shared
+	cp -R _build/default/_doc/_html/* docs
 
 view_doc:
 	google-chrome  _build/default/_doc/_html/index.html
