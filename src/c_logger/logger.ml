@@ -12,6 +12,8 @@ let logger : Tjr_log.log_ops option ref =
 (* logging --------------------------------------------------------- *)
 
 let log s = (dest_Some !logger).log s 
+let jlog s = (dest_Some !logger).jlog s 
+
 
 let log_lazy f = (dest_Some !logger).log_lazy f
 
