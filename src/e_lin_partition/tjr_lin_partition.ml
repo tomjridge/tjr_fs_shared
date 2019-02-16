@@ -11,8 +11,21 @@ From a list r0 k0 r1 k1 ... kn rn+1, we have a partition of the space K into:
 
 And the corresponding map: fun k -> if k < k0 then r0 else ...
 
+------------
+
+Operations we need to support: 
+
+- find(k); we also need to be able to retrieve the actual key that matched k (see below)
+- update(int,r): change the value for interval int
+- merge_two(int1,int2): for two adjacent intervals, merge (assuming at least one key remains)
+- split_interval(int,r1,k1,r2): split the interval int (delete old interval, add two new intervals)
+  - refine_below(r0,k0): split Less_than(k) into Less_than(k0) and Between(k0,k)
+  - refine_above(kn,rn): ditto, vice versa
+
+
 *)
 
+(* FIXME should be called "interval"? *)
 type 'k key = 
   | Less_than of 'k  (* lt *)
   | Between of 'k * 'k  (* k1 <= _ < k2 *)
