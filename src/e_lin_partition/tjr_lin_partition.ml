@@ -15,14 +15,38 @@ And the corresponding map: fun k -> if k < k0 then r0 else ...
 
 Operations we need to support: 
 
-- find(k); we also need to be able to retrieve the actual key that matched k (see below)
-- update(int,r): change the value for interval int
-- merge_two(int1,int2): for two adjacent intervals, merge (assuming at least one key remains)
-- split_interval(int,r1,k1,r2): split the interval int (delete old interval, add two new intervals)
+- find(k); we also need to be able to retrieve the actual key that
+  matched k (see below)
+- add(intv,r): change the value for interval intv
+- merge(intv1,intv2,r): for two adjacent intervals, merge (assuming at
+  least one key remains)
+- split(intv,r1,k1,r2): split the interval intv (delete old interval,
+  add two new intervals)
   - refine_below(r0,k0): split Less_than(k) into Less_than(k0) and Between(k0,k)
   - refine_above(kn,rn): ditto, vice versa
+- adjust_midpoint(intv1,intv2,r1,k1,r2)- for steal cases; equivalent
+  to deleting two intvs then adding two
+- get size, and split into two partitions (subject to some size
+  constraints etc on each partition)
 
+It may be simpler to implement these operations via conversion to
+lists? But this seems a bit awful.
 
+For the steal/merge-left cases, we need to be able to navigate to the
+immediately-preceding interval. And similarly, we need to be able to
+navigate to the immediately-following interval. Given an interval, the
+immediately-following interval can be derived. However, for the
+immediately preceeding interval, we probably have to maintain a "pred"
+map. This could be done in-map (eg as extra info in the value
+component of a map entry), or outside (as a separate map that is
+updated independently). Alternatively, we could accept a "key" that is
+semantically "slightly less than" some given key. This would allow to
+locate the "previous" interval fairly directly.
+
+At any rate, we probably need:
+
+- next_intv(intv): intv option
+- prev_intv(intv): intv option
 *)
 
 (* FIXME should be called "interval"? *)
