@@ -106,6 +106,11 @@ let _ = List.map (key_compare Tjr_int.compare (Find(2))) examples
 let _ = List.map (key_compare Tjr_int.compare (Find(3))) examples
 end
 
+let rec iter_opt f x =
+  match f x with
+  | Some x -> iter_opt f x
+  | None -> x
+
 (* we require at least one key and two r *)
 let make_map k_cmp ks rs =
   assert(List.length ks >=1);
@@ -117,7 +122,7 @@ let make_map k_cmp ks rs =
     Tjr_polymap.add (Less_than k0) r0 map
   in
   (* now do the "betweens" *)
-  Tjr_iter.iter_opt 
+  iter_opt 
     (fun (map,ks,rs) -> 
        match (ks,rs) with 
        | k1::k2::_,r2::_ -> 
@@ -135,3 +140,85 @@ let ex = make_map Tjr_int.compare [0;1;2;3] ["r0";"r1";"r2";"r3";"r4"]
 let _ = 
   [-1;0;1;2;3;4] |> List.map (fun x ->
   Tjr_polymap.find (Find(x)) ex)
+
+
+
+(* predecessor / successor relationship ----------------------------- *)
+
+(* maintain a set of pairs (pred,succ)? or two maps? let's maintain a
+   single map for the time being, for predecessor
+
+  but the map already has (essentially) this structure; even so,
+   perhaps better to separate out *)
+
+(* this assumes there is some underlying order, and we just track a finite subset of this order *)
+type ('k,'t) pred_succ_ops = {
+  empty: unit -> 't;
+  get_pred: 'k -> 't -> 'k option;
+  get_succ: 'k -> 't -> 'k option;
+  insert: 'k -> 't -> 't;
+  remove: 'k -> 't -> 't;
+  elements: 't -> 'k list;
+}
+
+
+(* implement the above using a set *)
+open Tjr_poly_set 
+
+type ('k,'t) set_ops = ('k,'t)Tjr_poly_set.set_ops
+
+let make_pred_succ_ops set_ops =
+  let empty () = set_ops.empty in
+  let get_pred k t = set_ops.split k t |> fun (lower,_,_) -> set_ops.max_elt_opt lower in
+  let get_succ k t = set_ops.split k t |> fun (_,_,higher) -> set_ops.min_elt_opt higher in
+  let insert k t = set_ops.add k t in
+  let remove k t = set_ops.remove k t in
+  let elements t = set_ops.elements t in
+  { empty; get_pred; get_succ; insert; remove; elements }
+
+let _=  make_pred_succ_ops
+
+
+(* example/test with ints ------------------------------------------- *)
+
+module Ignore2(_:sig end) = struct
+
+  let set_ops = Tjr_poly_set.make_set_ops (None:Tjr_set.Int_set.t option) (Tjr_int.compare)
+
+  let pred_succ_ops = make_pred_succ_ops set_ops
+
+  let _ = 
+    let { empty; get_pred; get_succ; insert; remove; elements } = pred_succ_ops in
+    let i2s i = match i with
+      | None -> "-"
+      | Some i -> string_of_int i
+    in
+    let print_state t = 
+      elements t |> List.iter (fun x ->
+          Printf.printf "Elt %d: pred=%s; succ=%s\n" 
+            x 
+            (get_pred x t |>i2s) 
+            (get_succ x t |>i2s))
+    in    
+    iter_opt 
+      (fun (t,ops) -> 
+         match ops with 
+         | [] -> None
+         | op::ops -> 
+           let t' = op t in
+           Some(t',ops))
+      (empty (),
+       [insert 2;
+        insert 4;
+        insert 6;
+        (fun t -> Printf.printf "%s\n" __LOC__; print_state t; t);
+        remove 4;
+        (fun t -> Printf.printf "%s\n" __LOC__; print_state t; t);
+        remove 2;
+        (fun t -> Printf.printf "%s\n" __LOC__; print_state t; t);
+        insert 10;
+        insert 11;
+        remove 10;
+        (fun t -> Printf.printf "%s\n" __LOC__; print_state t; t);
+       ])
+end
