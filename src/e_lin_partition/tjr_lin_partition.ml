@@ -74,9 +74,12 @@ Operations:
 
 (* Use the term "keyspace"; FIXME better options? *)
 type ('k,'r,'t) keyspace_ops = {
+  empty: 't;
+  bindings: 't -> ('k option * 'r) list;
   find: 'k -> 't -> ('k option * 'r); (* NOTE total; kopt is lower bound of intv *)
   add: 'k option -> 'r -> 't -> 't;
   merge_adjacent: 'k option -> 'k -> 'r -> 't -> 't;
+  (* first arg is lower bound of first intv; second is midpt *)
   split_intv: 'k option -> 'r*'k*'r -> 't -> 't;
   adjust_midpoint: 'k option -> 'k -> 'r*'k*'r -> 't -> 't;  
   (* adjust_midpoint l mid : l is the lower bound of the first
@@ -89,6 +92,8 @@ type ('k,'r,'t) keyspace_ops = {
 
 let make_keyspace_ops ~(k_cmp:'k -> 'k -> int) : ('k,'r,'t)keyspace_ops =
   let map_ops = Tjr_poly_map.make_map_ops (key_compare k_cmp) in    
+  let empty = map_ops.empty in
+  let bindings = map_ops.bindings in
   let find k t = 
     map_ops.split (Some k) t |> fun (t1,v,t2) ->
     match v with
@@ -111,6 +116,8 @@ let make_keyspace_ops ~(k_cmp:'k -> 'k -> int) : ('k,'r,'t)keyspace_ops =
     |> map_ops.add (Some k) r2
   in
   let adjust_midpoint low mid (r1,mid',r2) t =
+    assert(map_ops.mem low t);
+    assert(map_ops.mem (Some mid) t);
     t 
     |> map_ops.remove (Some mid)
     |> map_ops.add low r1
@@ -131,8 +138,42 @@ let make_keyspace_ops ~(k_cmp:'k -> 'k -> int) : ('k,'r,'t)keyspace_ops =
       map_ops.split (Some k) t |> fun (t1,_,t2) -> 
       (t1,k,map_ops.add None v t2)
   in
-  { find; add; merge_adjacent; split_intv; adjust_midpoint; k_size; split_keyspace } 
+  { empty; bindings; find; add; merge_adjacent; split_intv; adjust_midpoint; k_size; split_keyspace } 
   
 
 let _ = make_keyspace_ops
       
+
+
+(* test ------------------------------------------------------------- *)
+
+module Test(_ : sig end) = struct
+  let ops = make_keyspace_ops ~k_cmp:Tjr_int.compare
+
+  let ex = 
+    ops.empty
+    |> ops.add None "r0"
+    |> ops.add (Some 2) "r1"
+    |> ops.add (Some 4) "r2"
+    |> ops.add (Some 6) "r3"
+
+  let _ = ex |> ops.bindings
+
+  let _ = ex |> ops.find 1
+  let _ = ex |> ops.find 2
+  let _ = ex |> ops.find 7
+
+  let _ = ex |> ops.add (Some 5) "r" |> ops.bindings
+
+  let _ = ex |> ops.merge_adjacent (Some 4) 6 "r" |> ops.bindings
+
+  let _ = ex |> ops.split_intv (Some 4) ("r6",5,"r7") |> ops.bindings
+
+  let _ = ex |> ops.adjust_midpoint (Some 2) 4 ("a",3,"b") |> ops.bindings
+
+  let _ = ex |> ops.k_size
+
+  let _ = ex |> ops.split_keyspace |> fun (t1,k,t2) ->
+          (ops.bindings t1, k, ops.bindings t2)
+  ;;
+end
