@@ -23,13 +23,13 @@ let make ~monad_ops ~blk_sz ~with_state =
   let with_state = with_state.with_state in
   let write ~(blk_id:'blk_id) ~(blk:'blk) =
     with_state (fun ~state:s ~set_state ->
-        set_state (Tjr_polymap.add blk_id blk s) >>= fun _ -> 
+        set_state (Tjr_poly_map.add blk_id blk s) >>= fun _ -> 
       return ())
   in
   let read ~blk_id =
     (* NOTE assume never try to access an uninitialized blk *)
     with_state (fun ~state:s ~set_state ->
-        return (Tjr_polymap.find blk_id s))
+        return (Tjr_poly_map.find blk_id s))
   in
   { blk_sz; read; write }
   

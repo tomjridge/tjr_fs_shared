@@ -147,7 +147,7 @@ let _ = make_keyspace_ops
 
 (* test ------------------------------------------------------------- *)
 
-module Test(_ : sig end) = struct
+module Test(_ : sig end) : sig end = struct
   let ops = make_keyspace_ops ~k_cmp:Tjr_int.compare
 
   let ex = 

@@ -20,24 +20,12 @@ type ('k,'v,'map) kvop_map_ops = ('k,('k,'v)op,'map) Tjr_map.map_ops
 
 (* FIXME default kv map, not kvop *)
 let default_kvop_map_ops () : ('k,'v,'map) kvop_map_ops = 
-  let open Tjr_polymap in
+  let open Tjr_poly_map in
+  let map_ops = make_map_ops Pervasives.compare in
   let open Tjr_map in
-  { map_empty=empty Pervasives.compare;
-    map_is_empty=is_empty;
-    map_add=add;
-    map_remove=remove;
-    map_find=find_opt;
-    map_bindings=bindings}
-
-(* FIXME this is to map to a "normal" map where values are 'v; but we
-   probably want to map to a kvop map *)
-(*
-let op_list_to_map ops = 
-  List.fold_left
-    (fun map op -> 
-       match op with
-       | Insert(k,v) -> Tjr_polymap.add k v map
-       | Delete k -> Tjr_polymap.remove k map)
-    (Tjr_polymap.empty Pervasives.compare)
-    ops
-*)
+  { map_empty=map_ops.empty;
+    map_is_empty=map_ops.is_empty;
+    map_add=map_ops.add;
+    map_remove=map_ops.remove;
+    map_find=map_ops.find_opt;
+    map_bindings=map_ops.bindings}
