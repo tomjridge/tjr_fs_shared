@@ -13,9 +13,11 @@ From a list r0 k0 r1 k1 ... kn rn+1, we have a partition of the space K into:
 
 And the corresponding map: fun k -> if k < k0 then r0 else ...
 
+
+
 ------------
 
-Operations we need to support: 
+Operations we need to support (see frame_ops and node_ops): 
 
 - find(k); we also need to be able to retrieve the actual key that
   matched k (see below)
@@ -58,40 +60,56 @@ let rec key_compare k_cmp k1 k2 =
 
 
 (* 
+FIXME in the following we want to always be working with a map that maintains internal invariants.
+
 So, given a key k, we can get the range k1 <= k < k2 (or other), and get the corresponding r.
 
 Operations:
 
 | find(k)                               | get intv for k; lookup intv                       | 
-| add(intv,r)                           | replace intv binding in map                       | 
+| add(intv,r)                           | add/replace intv binding in map                       | 
 | merge_adjacent(intv1,intv2,r)                  | remove intvs; add(intv,r); adjust pred/succ       | 
 | split(intv,r1,k1,r2)                  | remove intv; add new intvs; adjust pred/succ      | 
 | adjust_midpoint(intv1,intv2,r1,k1,r2) | remove two intvs; add two intvs; adjust pred/succ | 
 | get size                              | pred/succ.elements gives size                     | 
 | split into two                        | map has a split operation, and also set; use these to implement split | 
-
+| merge keyspaces  | take two adjacent kspaces separated by a key, and form a single keyspace; k maps to lower keys of second keyspace
 *)
 
-(* Use the term "keyspace"; FIXME better options? *)
+(* Use the term "keyspace"; FIXME better options? FIXME xxx marks interface that is probably not used *)
 type ('k,'r,'t) keyspace_ops = {
-  empty: 't;
-  bindings: 't -> ('k option * 'r) list;
-  find: 'k -> 't -> ('k option * 'r); (* NOTE total; kopt is lower bound of intv *)
-  add: 'k option -> 'r -> 't -> 't;
-  merge_adjacent: 'k option -> 'k -> 'r -> 't -> 't;
+  from_krs: 'k list * 'r list -> 't;
+  to_krs: 't -> 'k list * 'r list;
+
+  find_intv_and_binding_for_key: 'k -> 't -> ('k option * 'r); 
+  (* NOTE total; kopt is lower bound of intv *)
+
+  k_size: 't -> int;
+
+  split_keyspace_on_key: 'k -> 't -> 't*'k*'t;
+  split_keyspace_at_index: int -> 't -> 't * 't;
+
+  merge_keyspaces: 't*'k*'t -> 't;
+  ks_dest_cons: 't -> ('r*'k*'t);
+  ks_dest_snoc: 't -> ('t*'k*'r);
+
+  
+  xxx_split_keyspace: 't -> 't * 'k * 't;
+  xxx_empty: 't;
+  xxx_bindings: 't -> ('k option * 'r) list;
+  xxx_add: 'k option -> 'r -> 't -> 't;
+  xxx_merge_adjacent: 'k option -> 'k -> 'r -> 't -> 't;
   (* first arg is lower bound of first intv; second is midpt *)
-  split_intv: 'k option -> 'r*'k*'r -> 't -> 't;
-  adjust_midpoint: 'k option -> 'k -> 'r*'k*'r -> 't -> 't;  
+  xxx_split_intv: 'k option -> 'r*'k*'r -> 't -> 't;
+  xxx_adjust_midpoint: 'k option -> 'k -> 'r*'k*'r -> 't -> 't;  
   (* adjust_midpoint l mid : l is the lower bound of the first
      interval; mid is the midpoint *)
-  k_size: 't -> int;
-  split_keyspace: 't -> 't * 'k * 't;
 }
 
   
 
 let make_keyspace_ops ~(k_cmp:'k -> 'k -> int) : ('k,'r,'t)keyspace_ops =
-  let map_ops = Tjr_poly_map.make_map_ops (key_compare k_cmp) in    
+  let map_ops : ('k option,'r,'impl) Tjr_poly_map.map_ops = Tjr_poly_map.make_map_ops (key_compare k_cmp) in    
   let empty = map_ops.empty in
   let bindings = map_ops.bindings in
   let find k t = 
@@ -138,8 +156,32 @@ let make_keyspace_ops ~(k_cmp:'k -> 'k -> int) : ('k,'r,'t)keyspace_ops =
       map_ops.split (Some k) t |> fun (t1,_,t2) -> 
       (t1,k,map_ops.add None v t2)
   in
-  { empty; bindings; find; add; merge_adjacent; split_intv; adjust_midpoint; k_size; split_keyspace } 
-  
+  let merge_keyspaces ( (t1:'impl),k, (t2:'impl) ) = 
+    (* as t1, but k maps to the keys below t2.k0; we can alter t2 to
+       map k to t2.None (and remove None mapping); then just combine
+       the maps *)
+    let t2 = 
+      let ks = map_ops.find_opt None t2 |> dest_Some in
+      t2 |> map_ops.remove None |> map_ops.add (Some k) ks 
+    in
+    map_ops.disjoint_union t1 t2
+  in    
+  (* keyspace(r,k,...) -> (r,k,keyspace(...)) *)
+  let ks_dest_cons t = 
+    let r = map_ops.find_opt None t |> dest_Some in
+    let t = map_ops.remove None t in
+    let k = map_ops.min_binding_opt t |> dest_Some |> fun (k,v) -> k |> dest_Some in
+    let t = map_ops.remove (Some k) t in
+    (r,k,t)
+  in
+  (* keyspace(...,k,r) -> (keyspace(...),k,r) *)
+  let ks_dest_snoc t = 
+    let k = map_ops.max_binding_opt t |> dest_Some |> fun (k,v) -> k |> dest_Some in
+    let r = map_ops.find_opt (Some k) t |> dest_Some in
+    let t = map_ops.remove (Some k) t in
+    (t,k,r)
+  in
+  { empty; bindings; find; add; merge_adjacent; split_intv; adjust_midpoint; k_size; split_keyspace; merge_keyspaces; ks_dest_cons; ks_dest_snoc } 
 
 let _ = make_keyspace_ops
       
