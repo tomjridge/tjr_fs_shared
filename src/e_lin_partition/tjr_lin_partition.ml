@@ -76,7 +76,8 @@ Operations:
 | merge keyspaces  | take two adjacent kspaces separated by a key, and form a single keyspace; k maps to lower keys of second keyspace
 *)
 
-(* Use the term "keyspace"; FIXME better options? FIXME xxx marks interface that is probably not used *)
+(* Use the term "keyspace"; FIXME better options? FIXME xxx marks
+   interface that is probably not used *)
 type ('k,'r,'t) keyspace_ops = {
   krs2ks: 'k list * 'r list -> 't;
   ks2krs: 't -> 'k list * 'r list;
@@ -86,7 +87,31 @@ type ('k,'r,'t) keyspace_ops = {
 
   k_size: 't -> int;
 
-  split_keyspace_on_key: 'k -> 't -> 't*'k*'t; (* FIXME semantics? *)
+  (* split_keyspace_on_key:
+
+  ... k2  k3
+... r1  r2  r3 ....
+
+return r2 st k2<=k<k2; additionally return k2. Also return _r1^k2, ^k3_r3 as ... keyspaces?
+
+Using the "lower bound" repn, we have:
+
+k0=None k1 ... kn  k(n+1)
+   r0   r1 ... rn  r(n+1)
+
+----
+
+Current 2019-04-01 impl:
+
+Suppose kn <= k < k(n+1). What gets returned?
+
+(1 lh) _r0^None .. _r(n-1)^k(n-1)   
+(2) kn
+(3) rn
+(4 rh) ^k(n+1)_r(n+1)
+
+*)
+  split_keyspace_on_key: 'k -> 't -> 't*'k option*'r*'t; 
   split_keyspace_at_index: int -> 't -> 't*'k*'t; (* FIXME semantics? *)
 
   merge_keyspaces: 't*'k*'t -> 't;
@@ -95,6 +120,7 @@ type ('k,'r,'t) keyspace_ops = {
 
   ks_internal_empty: 't;
   ks_internal_add: 'k option -> 'r -> 't -> 't;  (* for snoc and cons *)
+  ks_internal_find_opt: 'k option -> 't -> 'r option;
   (* ks_internal_remove: 'k option -> 't -> 't; *)
 
 
@@ -155,13 +181,13 @@ let make_keyspace_ops (type k r t) ~(k_cmp:k -> k -> int) : (k,r,(k option,r,t)T
   in
   let _ = split_keyspace_at_index in
   let split_keyspace_on_key k t = 
-    find_intv_and_binding_for_key k t |> fun (k',_r) ->
-    match k' with
-    | None -> failwith __LOC__
-    | Some k' -> 
-      map_ops.split (Some k') t |> fun (t1,r,t2) -> 
-      map_ops.add None (dest_Some r) t2 |> fun t2 ->
-      (t1,k', t2)
+    find_intv_and_binding_for_key k t |> fun (k',r) ->
+    map_ops.split k' t |> fun (t1,r',t2) -> 
+(* this gets us ...^k(i-1)_r(i), with k'=ki, and t2 as rh *)
+    assert (r'=Some r);
+    (* DONT add a lower bound to t2; keep things simple... especially for rh_dest_cons *)
+    (* map_ops.add None r t2 |> fun t2 -> *)
+    (t1,k',r, t2)
   in
   let merge_keyspaces (t1,k,t2) = 
     (* as t1, but k maps to the keys below t2.k0; we can alter t2 to
@@ -185,21 +211,39 @@ let make_keyspace_ops (type k r t) ~(k_cmp:k -> k -> int) : (k,r,(k option,r,t)T
   let _ = ks_dest_cons in
   (* keyspace(...,k,r) -> (keyspace(...),k,r) *)
   let ks_dest_snoc t = 
-    let k = map_ops.max_binding_opt t |> dest_Some |> fun (k,v) -> k |> dest_Some in
-    let r = map_ops.find_opt (Some k) t |> dest_Some in
+    let k,r = map_ops.max_binding_opt t |> dest_Some |> fun (k,v) -> k |> dest_Some,v in
+    (* let r = map_ops.find_opt (Some k) t |> dest_Some in *)
     let t = map_ops.remove (Some k) t in
     (t,k,r)
   in
   let _ = ks_dest_snoc in
   let ks_internal_add k r t = map_ops.add k r t in
   let ks_internal_empty = map_ops.empty in
+  let ks_internal_find_opt k t = map_ops.find_opt k t in
   { krs2ks; ks2krs; find_intv_and_binding_for_key; k_size; split_keyspace_on_key; 
     split_keyspace_at_index; merge_keyspaces; ks_dest_cons; ks_dest_snoc; ks_internal_add;
-    ks_internal_empty } 
+    ks_internal_empty; ks_internal_find_opt } 
+
+
+let _ : 
+k_cmp:('a -> 'a -> int) ->
+('a, 'b, ('a option, 'b, 'c) Tjr_poly_map.map) keyspace_ops
+= make_keyspace_ops
+
+
+(* hide the polymap in the type *)
+
+type internal
+
+type ('k,'r) keyspace = ('k option,'r,internal) Tjr_poly_map.map
+
+let make_keyspace_ops : 
+k_cmp:('a -> 'a -> int) ->
+('a, 'b, ('a, 'b) keyspace) keyspace_ops
+= make_keyspace_ops
 
 
 
-let _ = make_keyspace_ops
 
 
   (* some older additional operations *)
