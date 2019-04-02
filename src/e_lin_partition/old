@@ -1,0 +1,31 @@
+
+Operations we need to support (see frame_ops and node_ops): 
+
+- find(k); we also need to be able to retrieve the actual key that
+  matched k (see below)
+- add(intv,r): change the value for interval intv
+- merge(intv1,intv2,r): for two adjacent intervals, merge (assuming at
+  least one key remains)
+- split(intv,r1,k1,r2): split the interval intv (delete old interval,
+  add two new intervals)
+  - refine_below(r0,k0): split Less_than(k) into Less_than(k0) and Between(k0,k)
+  - refine_above(kn,rn): ditto, vice versa
+- adjust_midpoint(intv1,intv2,r1,k1,r2)- for steal cases; equivalent
+  to deleting two intvs then adding two
+- get size, and split into two partitions (subject to some size
+  constraints etc on each partition)
+
+FIXME in the following we want to always be working with a map that maintains internal invariants.
+
+So, given a key k, we can get the range k1 <= k < k2 (or other), and get the corresponding r.
+
+Operations:
+
+| find(k)                               | get intv for k; lookup intv                       | 
+| add(intv,r)                           | add/replace intv binding in map                       | 
+| merge_adjacent(intv1,intv2,r)                  | remove intvs; add(intv,r); adjust pred/succ       | 
+| split(intv,r1,k1,r2)                  | remove intv; add new intvs; adjust pred/succ      | 
+| adjust_midpoint(intv1,intv2,r1,k1,r2) | remove two intvs; add two intvs; adjust pred/succ | 
+| get size                              | pred/succ.elements gives size                     | 
+| split into two                        | map has a split operation, and also set; use these to implement split | 
+| merge keyspaces  | take two adjacent kspaces separated by a key, and form a single keyspace; k maps to lower keys of second keyspace

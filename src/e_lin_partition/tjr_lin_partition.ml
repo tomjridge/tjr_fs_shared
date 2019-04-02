@@ -1,41 +1,33 @@
 (* A linear partition of a key space; this is used in the B-tree to implement nodes. 
 
 
-v.3, based on a map from k option to r
+We have two main types:
+- keyspace: a finite, total map from some totally ordered keyspace
+- semi-keyspace: as keyspace, but covers only those keys >= some given key (the "lower bound")
 
-From a list r0 k0 r1 k1 ... kn rn+1, we have a partition of the space K into:
+The implementation of keyspace and semi-keyspace both use k option as the key, rather than k. This
+allows the use of "None" as a "lower bound" for the whole key space, and also allows a keyspace to be split easily into two halfs. The semi-keyspace does not have a "None" entry of course, so the typing is looser than it could be (in favour of more efficient operations).
 
-- below k0
-- k0 <= _ < k1
+The node of a B-tree has pointers r separated by keys k. Take k0=None.
+
+Then we have:
+
+k0<= f(r0) < k1 <= f(r1) ...
+
+From a list r0 k1 r1 k2 ... kn rn, we have a partition of the space K into:
+
+- below k1
 - k1 <= _ < k2
 - ...
 - kn <= _
 
-And the corresponding map: fun k -> if k < k0 then r0 else ...
+And the corresponding map: fun k -> if k < k1 then r0 else ...
 
-
-
-------------
-
-Operations we need to support (see frame_ops and node_ops): 
-
-- find(k); we also need to be able to retrieve the actual key that
-  matched k (see below)
-- add(intv,r): change the value for interval intv
-- merge(intv1,intv2,r): for two adjacent intervals, merge (assuming at
-  least one key remains)
-- split(intv,r1,k1,r2): split the interval intv (delete old interval,
-  add two new intervals)
-  - refine_below(r0,k0): split Less_than(k) into Less_than(k0) and Between(k0,k)
-  - refine_above(kn,rn): ditto, vice versa
-- adjust_midpoint(intv1,intv2,r1,k1,r2)- for steal cases; equivalent
-  to deleting two intvs then adding two
-- get size, and split into two partitions (subject to some size
-  constraints etc on each partition)
-
-
+For the operations we need to support, see frame_ops and node_ops
 
 *)
+
+(* \doc(old) *)
 
 let dest_Some x = match x with Some x -> x | _ -> failwith "dest_Some"
 
@@ -46,6 +38,8 @@ let rec iter_opt f x =
   | None -> x
 
 
+(* If min_key is None, the map is total; otherwise the map is
+   a semi-keyspace, defined above min_key *)
 type ('k,'r,'t) partition = ('k option, 'r, 't) Tjr_poly_map.map
 
 
@@ -59,96 +53,62 @@ let rec key_compare k_cmp k1 k2 =
   | Some k1, Some k2 -> k_cmp k1 k2
 
 
-(* 
-FIXME in the following we want to always be working with a map that maintains internal invariants.
-
-So, given a key k, we can get the range k1 <= k < k2 (or other), and get the corresponding r.
-
-Operations:
-
-| find(k)                               | get intv for k; lookup intv                       | 
-| add(intv,r)                           | add/replace intv binding in map                       | 
-| merge_adjacent(intv1,intv2,r)                  | remove intvs; add(intv,r); adjust pred/succ       | 
-| split(intv,r1,k1,r2)                  | remove intv; add new intvs; adjust pred/succ      | 
-| adjust_midpoint(intv1,intv2,r1,k1,r2) | remove two intvs; add two intvs; adjust pred/succ | 
-| get size                              | pred/succ.elements gives size                     | 
-| split into two                        | map has a split operation, and also set; use these to implement split | 
-| merge keyspaces  | take two adjacent kspaces separated by a key, and form a single keyspace; k maps to lower keys of second keyspace
-*)
-
 (* Use the term "keyspace"; FIXME better options? FIXME xxx marks
-   interface that is probably not used *)
+   interface that is probably not used 
+
+See \doc(keyspace_ops)
+*)
 type ('k,'r,'t) keyspace_ops = {
-  krs2ks: 'k list * 'r list -> 't;
-  ks2krs: 't -> 'k list * 'r list;
+  krs2ks: 'k list * 'r list -> 't;  (* NOTE assumes |rs|=|ks|+1 *)
+  ks2krs: 't -> 'k list * 'r list;  (* NOTE |rs|=|ks|+1; no None key *)
 
   find_intv_and_binding_for_key: 'k -> 't -> ('k option * 'r); 
-  (* NOTE total; kopt is lower bound of intv *)
+  (* NOTE if t is total, then this is total; kopt is greatest lower
+     bound for k; it is an error to call this on a semi-keyspace? *)
 
   k_size: 't -> int;
 
-  (* split_keyspace_on_key:
+  split_keyspace_on_key: 'k -> 't -> 't*'k option*'r*'t; (* see doc *)
 
-  ... k2  k3
-... r1  r2  r3 ....
+  split_keyspace_at_index: int -> 't -> 't*'k*'t; 
+  (* only for total keyspace; returns two *total* keyspaces; see doc *)
 
-return r2 st k2<=k<k2; additionally return k2. Also return _r1^k2, ^k3_r3 as ... keyspaces?
+  merge_keyspaces: 't*'k*'t -> 't;  (* see doc *)
+  
+  ks_dest_cons: 't -> ('r*'k*'t);  
+  (* steal right; expected to be used on total keyspace; see doc *)
 
-Using the "lower bound" repn, we have:
+  ks_dest_snoc: 't -> ('t*'k*'r);  (* see doc *)
+}
 
-k0=None k1 ... kn  k(n+1)
-   r0   r1 ... rn  r(n+1)
+(*
 
-----
 
-Current 2019-04-01 impl:
-
-Suppose kn <= k < k(n+1). What gets returned?
-
-(1 lh) _r0^None .. _r(n-1)^k(n-1)   
-(2) kn
-(3) rn
-(4 rh) ^k(n+1)_r(n+1)
-
-*)
-  split_keyspace_on_key: 'k -> 't -> 't*'k option*'r*'t; 
-  split_keyspace_at_index: int -> 't -> 't*'k*'t; (* FIXME semantics? *)
-
-  merge_keyspaces: 't*'k*'t -> 't;
-  ks_dest_cons: 't -> ('r*'k*'t);
-  ks_dest_snoc: 't -> ('t*'k*'r);
+  (* reveal internals ?*)
+  ks_internal_ops: ('k option,'r,('k option,'r,'t)Tjr_poly_map.map) Tjr_poly_map.map_ops
 
   ks_internal_empty: 't;
   ks_internal_add: 'k option -> 'r -> 't -> 't;  (* for snoc and cons *)
-  ks_internal_find_opt: 'k option -> 't -> 'r option;
-  (* ks_internal_remove: 'k option -> 't -> 't; *)
+  ks_internal_find_opt: 'k option -> 't -> 'r option;  (* lookup directly in map *)
 
-
-(*  
-  xxx_split_keyspace: 't -> 't * 'k * 't;
-  xxx_empty: 't;
-  xxx_bindings: 't -> ('k option * 'r) list;
-  xxx_add: 'k option -> 'r -> 't -> 't;
-  xxx_merge_adjacent: 'k option -> 'k -> 'r -> 't -> 't;
-  (* first arg is lower bound of first intv; second is midpt *)
-  xxx_split_intv: 'k option -> 'r*'k*'r -> 't -> 't;
-  xxx_adjust_midpoint: 'k option -> 'k -> 'r*'k*'r -> 't -> 't;  
-  (* adjust_midpoint l mid : l is the lower bound of the first
-     interval; mid is the midpoint *)
+  ks_dest_cons: 't -> ('r*'k*'t);  (* expected to be used on semi-keyspace? *)
+  ks_dest_snoc: 't -> ('t*'k*'r);  (* also for semi-keyspace *)
 *)
-}
-
   
 
-let make_keyspace_ops (type k r t) ~(k_cmp:k -> k -> int) : (k,r,(k option,r,t)Tjr_poly_map.map) keyspace_ops =
+let make_keyspace_ops' (type k r t) ~(k_cmp:k -> k -> int) =
   let map_ops : (k option,r,(k option,r,t)Tjr_poly_map.map) Tjr_poly_map.map_ops = Tjr_poly_map.make_map_ops (key_compare k_cmp) in    
   let _ = map_ops in
+  let is_total t = 
+    match map_ops.min_binding_opt t with Some (None,_) -> true | _ -> false
+  in
   let krs2ks (ks,rs) = 
     assert(List.length rs = List.length ks + 1);
     let ks = None::(List.map (fun x -> Some x) ks) in
     map_ops.of_bindings (List.combine ks rs)
   in
   let ks2krs ks = 
+    assert (is_total ks);
     ks |> map_ops.bindings |> List.split |> fun (ks,rs) -> 
     (List.tl ks|>List.map dest_Some), rs
   in
@@ -176,73 +136,92 @@ let make_keyspace_ops (type k r t) ~(k_cmp:k -> k -> int) : (k,r,(k option,r,t)T
     | [] -> failwith "impossible"
     | (None,_)::_ -> failwith "impossible"
     | (Some k,v)::_ -> 
-      map_ops.split (Some k) t |> fun (t1,_,t2) -> 
+      map_ops.split (Some k) t |> fun (t1,_(*Some v*),t2) -> 
       (t1,k,map_ops.add None v t2)
   in
   let _ = split_keyspace_at_index in
   let split_keyspace_on_key k t = 
     find_intv_and_binding_for_key k t |> fun (k',r) ->
     map_ops.split k' t |> fun (t1,r',t2) -> 
-(* this gets us ...^k(i-1)_r(i), with k'=ki, and t2 as rh *)
+    (* this gets us ...^k(i-1)_r(i), with k'=ki, and t2 as rh *)
     assert (r'=Some r);
-    (* DONT add a lower bound to t2; keep things simple... especially for rh_dest_cons *)
-    (* map_ops.add None r t2 |> fun t2 -> *)
+    (* DONT add a lower bound to t2; see doc *)
     (t1,k',r, t2)
   in
-  let merge_keyspaces (t1,k,t2) = 
-    (* as t1, but k maps to the keys below t2.k0; we can alter t2 to
-       map k to t2.None (and remove None mapping); then just combine
-       the maps *)
+  let merge_keyspaces (t1,k,t2) = (* see doc *)
     let t2 = 
+      assert (is_total t1);
+      assert (is_total t2);
+      (* k is lower bound for t2; strict upper bound for t1 *)
       let ks = map_ops.find_opt None t2 |> dest_Some in
       t2 |> map_ops.remove None |> map_ops.add (Some k) ks 
     in
     map_ops.disjoint_union t1 t2
   in 
   let _ = merge_keyspaces in
-  (* keyspace(r,k,...) -> (r,k,keyspace(...)) *)
   let ks_dest_cons t = 
-    let r = map_ops.find_opt None t |> dest_Some in
-    let t = map_ops.remove None t in
-    let k = map_ops.min_binding_opt t |> dest_Some |> fun (k,v) -> k |> dest_Some in
-    let t = map_ops.remove (Some k) t in
-    (r,k,t)
+    assert (is_total t);
+    let r0 = map_ops.find_opt None t |> dest_Some in
+    let k1,r1 = map_ops.min_binding_opt t |> dest_Some in
+    assert(k1<>None);
+    let k1 = k1 |> dest_Some in
+    let t = t|>map_ops.add None r1 in
+    (r1,k1,t)
   in
   let _ = ks_dest_cons in
-  (* keyspace(...,k,r) -> (keyspace(...),k,r) *)
   let ks_dest_snoc t = 
-    let k,r = map_ops.max_binding_opt t |> dest_Some |> fun (k,v) -> k |> dest_Some,v in
-    (* let r = map_ops.find_opt (Some k) t |> dest_Some in *)
-    let t = map_ops.remove (Some k) t in
-    (t,k,r)
+    assert (is_total t);
+    let kn,rn = map_ops.max_binding_opt t |> dest_Some in
+    assert (kn<>None);
+    let kn = kn |> dest_Some in
+    let t = map_ops.remove (Some kn) t in
+    (t,kn,rn)
   in
-  let _ = ks_dest_snoc in
+(*  let _ = ks_dest_snoc in
   let ks_internal_add k r t = map_ops.add k r t in
   let ks_internal_empty = map_ops.empty in
-  let ks_internal_find_opt k t = map_ops.find_opt k t in
-  { krs2ks; ks2krs; find_intv_and_binding_for_key; k_size; split_keyspace_on_key; 
-    split_keyspace_at_index; merge_keyspaces; ks_dest_cons; ks_dest_snoc; ks_internal_add;
-    ks_internal_empty; ks_internal_find_opt } 
+  let ks_internal_find_opt k t = map_ops.find_opt k t in *)
+  let keyspace_ops : (k,r,(k option,r,t)Tjr_poly_map.map) keyspace_ops = 
+    { krs2ks; ks2krs; find_intv_and_binding_for_key; k_size; split_keyspace_on_key; 
+    split_keyspace_at_index; merge_keyspaces; ks_dest_cons; ks_dest_snoc; 
+    (* ks_internal_add; ks_internal_empty; ks_internal_find_opt  *)
+    }
+  in
+  fun f -> f ~keyspace_ops ~map_ops
 
 
 let _ : 
 k_cmp:('a -> 'a -> int) ->
-('a, 'b, ('a option, 'b, 'c) Tjr_poly_map.map) keyspace_ops
-= make_keyspace_ops
+(keyspace_ops:('a, 'b, ('a option, 'b, 'c) Tjr_poly_map.map) keyspace_ops ->
+ map_ops:('a option, 'b, ('a option, 'b, 'c) Tjr_poly_map.map)
+         Tjr_poly_map.map_ops ->
+ 'd) ->
+'d
+= make_keyspace_ops'
 
 
-(* hide the polymap in the type *)
+(* hide the polymap in the type ------------------------------------- *)
 
 type internal
 
+(* this reveals the structure of the keyspace *)
 type ('k,'r) keyspace = ('k option,'r,internal) Tjr_poly_map.map
 
-let make_keyspace_ops : 
-k_cmp:('a -> 'a -> int) ->
-('a, 'b, ('a, 'b) keyspace) keyspace_ops
-= make_keyspace_ops
+module Internal : sig
+  open Tjr_poly_map
+  val make_keyspace_ops : k_cmp:('a -> 'a -> int) ->
+    ('a, 'b, ('a, 'b) keyspace) keyspace_ops
+  val make_map_ops: k_cmp:('k -> 'k -> int) ->
+    ('k option, 'r, ('k,'r)keyspace) map_ops
+end = struct
+  let make_keyspace_ops ~k_cmp = make_keyspace_ops' ~k_cmp @@ fun ~keyspace_ops ~map_ops -> 
+    keyspace_ops
 
+  let make_map_ops ~k_cmp = make_keyspace_ops' ~k_cmp @@ fun ~keyspace_ops ~map_ops -> 
+    map_ops
+end
 
+include Internal
 
 
 
@@ -306,3 +285,18 @@ module Test(_ : sig end) : sig end = struct
 *)
   ;;
 end
+
+(* old ks ops
+
+ks_internal_remove: 'k option -> 't -> 't; 
+  xxx_split_keyspace: 't -> 't * 'k * 't;
+  xxx_empty: 't;
+  xxx_bindings: 't -> ('k option * 'r) list;
+  xxx_add: 'k option -> 'r -> 't -> 't;
+  xxx_merge_adjacent: 'k option -> 'k -> 'r -> 't -> 't;
+  (* first arg is lower bound of first intv; second is midpt *)
+  xxx_split_intv: 'k option -> 'r*'k*'r -> 't -> 't;
+  xxx_adjust_midpoint: 'k option -> 'k -> 'r*'k*'r -> 't -> 't;  
+  (* adjust_midpoint l mid : l is the lower bound of the first
+     interval; mid is the midpoint *)
+*)

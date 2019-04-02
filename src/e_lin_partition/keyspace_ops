@@ -1,0 +1,67 @@
+-*- org -*-
+
+* split_keyspace_on_key k t
+
+  ... k2  k3
+... r1  r2  r3 ....
+
+return r2 st k2<=k<k2; additionally return k2. Also return _r1^k2, ^k3_r3 as semi-keyspaces
+
+Using the "lower bound" repn, we have:
+
+k0=None k1 ... kn  k(n+1)
+   r0   r1 ... rn  r(n+1)
+
+----
+
+Current 2019-04-01 impl:
+
+Suppose kn <= k < k(n+1). What gets returned?
+
+(1 pre-lh) [None->r0; k1->r1; ...; k(n-1)->r(n-1)]  (a total keyspace;
+can be empty if k < k1)
+(2) kn
+(3) rn
+(4 rh) [k(n+1)->r(n+1); ... ]  (a semi-keyspace; may be empty)
+
+NOTE that we also know that kn is an upperbound on pre-lh
+
+The pair pre-lh,kn is a "left half"
+
+* split_keyspace_at_index i t
+
+We want to create two nodes (keyspaces) from a node that is too large.
+
+The integer i is the integer of the index of the ith non-None key; so
+it corresponds to key i+1 in a total keyspace
+
+We get returned:
+
+(t1) [... ki->ri ]  (a total keyspace)
+(k)  k(i+1)
+(t2) [ None-> r(i+1); k(i+2)->r(i+2) ... ]  (a total keyspace)
+
+The key k is a strict upper bound on t1, and a lower bound on t2.
+
+
+* merge_keyspaces (t1,k,t2)
+
+This is used twice in delete (for merging left and right). The key
+replaces the None binding in t2, and then the maps are merged.
+
+The key k is a strict upper bound on the first keyspace t1. The second
+keyspace is a semi-keyspace, defined >= k (k is a lower bound for t2;
+replaces None binding).
+
+
+* ks_dest_cons t
+
+t is total: None->r0; k1->r1 ...
+
+returns: r0,k1, None->r1,k2->r2...
+
+* ks_dest_snoc t
+
+t is total: None->r0; ... kn->rn
+
+returns: None->r0; ..., kn, rn
