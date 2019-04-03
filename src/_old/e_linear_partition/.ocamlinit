@@ -1,0 +1,3 @@
+#use "/home/tr61/.ocamlinit";;
+#require "tjr_lib";;
+#require "tjr_polymap";;
