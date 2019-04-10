@@ -12,12 +12,11 @@ This can be simplified:
 open Tjr_poly_map
 
 let make_ops ~map_ops =
-  let get_next_binding k t = 
-    map_ops.split k t |> fun (_,_,t) ->
-    map_ops.min_binding_opt t
+  let k_cmp = map_ops.k_cmp in
+  let get_next_binding k t =     
+    t |> map_ops.find_first_opt (fun k' -> k_cmp k k' < 0)
   in
   let get_prev_binding k t = 
-    map_ops.split k t |> fun (t,_,_) ->
-    map_ops.max_binding_opt t
+    t |> map_ops.find_last_opt (fun k' -> k_cmp k' k < 0)
   in
   fun f -> f ~get_next_binding ~get_prev_binding

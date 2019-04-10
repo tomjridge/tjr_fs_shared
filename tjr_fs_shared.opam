@@ -15,7 +15,6 @@ bug-reports: "https://github.com/tomjridge/tjr_fs_shared/issues"
 depends: [ 
   "tjr_lib" 
   "tjr_monad"
-  "tjr_polymap"
 ]
 
 # ----------------------------------------------------------------------
