@@ -16,7 +16,13 @@ Html version of the ocamldoc can be found in the docs/ directory.
 
 The html can be browsed online at <https://tomjridge.github.io/tjr_fs_shared/index.html>
 
-There is a summary of the main types in module Tjr_fs_shared_doc, available [locally](docs/tjr_fs_shared/Tjr_fs_shared__Tjr_fs_shared_doc/index.html) and [online](https://tomjridge.github.io/tjr_fs_shared/tjr_fs_shared/Tjr_fs_shared__Tjr_fs_shared_doc/index.html).
+There is a summary of the main types in module Tjr_fs_shared_doc,
+available
+[locally](docs/tjr_fs_shared/Tjr_fs_shared__Tjr_fs_shared_doc/index.html)
+and
+[online](https://tomjridge.github.io/tjr_fs_shared/tjr_fs_shared/Tjr_fs_shared/Tjr_fs_shared_doc/index.html).
+
+
 
 ## Dependencies
 
