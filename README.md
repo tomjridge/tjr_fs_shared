@@ -24,13 +24,14 @@ and
 
 
 
-## Dependencies
+## Dependencies 
 
-NOTE there are no opam dependencies beyond what is required by the following.
 
-| Dependency | Comment |
-| ---------- | ------- |
-| tjr_lib    |         |
-| tjr_monad  |         |
+
+| Dependency                                          | Comment                                                  |
+| --------------------------------------------------- | -------------------------------------------------------- |
+| bin_prot; ppx_bin_prot; yojson; ppx_deriving_yojson |                                                          |
+| tjr_lib                                             |                                                          |
+| tjr_monad                                           | So we don't have to explicit include in later libraries. |
 
 
