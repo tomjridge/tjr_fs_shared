@@ -1,5 +1,5 @@
 (** Block devices *)
-open Blk_sz_type
+open Blk_sz
 
 module Internal_generic_over_dev = struct
   (** NOTE may need trim, FUA etc NOTE [dev] is the "type" of the

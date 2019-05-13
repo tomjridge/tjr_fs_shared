@@ -19,7 +19,7 @@ module String_block_ops = struct
     let to_string s = s in
     let of_bytes bs = of_string (Bytes.to_string bs) in
     let to_bytes b = Bytes.of_string b in
-    let blk_sz = Blk_sz_type.of_int blk_sz in
+    let blk_sz = Blk_sz.of_int blk_sz in
     { blk_sz; of_string; to_string; of_bytes; to_bytes }
 
 

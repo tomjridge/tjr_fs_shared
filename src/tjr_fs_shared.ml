@@ -4,7 +4,10 @@ A collection of the main types provided by this library. *)
 
 (** {2 Block-related types } *)
 
-type blk_sz = Blk_sz_type.blk_sz
+type blk_sz = Blk_sz.blk_sz
+module Blk_sz = Blk_sz
+let bsz_to_int = Blk_sz.to_int
+let bsz_of_int = Blk_sz.of_int
 
 include Block_ops_type
 
@@ -15,16 +18,17 @@ include Blk_dev_ops_type.Export
 
 module String_block_ops = Block_ops.String_block_ops
 
-module Blk_dev_implementations = struct
-  module Blk_dev_in_mem = Blk_dev_in_mem
-  module Blk_dev_on_fd = Blk_dev_on_fd
-end
+module Blk_dev_in_mem = Blk_dev_in_mem
+module Blk_dev_on_fd = Blk_dev_on_fd
 
 
 
 (** {2 Functional-store-passing monad} *)
 
-module Store_passing = Store_passing
+type fstore = Fstore_passing.fstore
+type fstore_passing = Fstore_passing.fstore_passing
+let fstore_passing_monad_ops = Fstore_passing.monad_ops
+module Fstore_passing = Fstore_passing
 
 
 (** {2 Kv ops} *)

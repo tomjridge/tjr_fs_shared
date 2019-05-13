@@ -1,6 +1,6 @@
 (** Operations on blocks *)
 
-open Blk_sz_type
+open Blk_sz
 
 
 
