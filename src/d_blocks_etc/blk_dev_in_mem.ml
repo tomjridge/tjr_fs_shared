@@ -1,6 +1,6 @@
 (** Simple in-memory block device. *)
 
-open Tjr_monad.Types
+(* open Tjr_monad.Types *)
 open Blk_dev_ops_type
 
 (* type blk_dev_in_mem = Blk_dev_in_mem *)

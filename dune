@@ -1,2 +1,2 @@
 (env
-  (dev (flags (:standard -w -26-27))))
+  (dev (flags (:standard -w -26-27 -open Tjr_monad))))

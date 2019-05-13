@@ -1,4 +1,4 @@
-open Tjr_monad.Types
+(* open Tjr_monad.Types *)
 
 (** Map operations: find, insert, [insert_many] and delete. 
 
