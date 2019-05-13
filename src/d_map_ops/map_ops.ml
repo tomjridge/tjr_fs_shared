@@ -1,8 +1,6 @@
-(* open Tjr_monad.Types *)
+(** Map operations find,ins,del, in; insert_all; make_insert_many *)
 
 include Map_ops_type
-
-
 
 (** Utility: call [insert_many] in a loop. *)
 let insert_all ~monad_ops =

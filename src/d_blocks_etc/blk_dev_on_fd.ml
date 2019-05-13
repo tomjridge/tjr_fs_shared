@@ -8,7 +8,7 @@ open Blk_dev_ops_type
 
 module Internal = struct
   let read ~(block_ops:'blk Block_ops.block_ops) ~fd ~blk_id = 
-    let blk_sz = block_ops.blk_sz in
+    let blk_sz = block_ops.blk_sz |> Blk_sz_type.to_int in
     ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET);
     let buf = Bytes.make blk_sz (Char.chr 0) in 
     let n = Unix.read fd buf 0 blk_sz in
@@ -19,7 +19,7 @@ module Internal = struct
     Bytes.to_string buf |> block_ops.of_string
 
   let write ~(block_ops:'blk Block_ops.block_ops) ~fd ~blk_id ~blk = 
-    let blk_sz = block_ops.blk_sz in
+    let blk_sz = block_ops.blk_sz |> Blk_sz_type.to_int in
     let blk = block_ops.to_string blk in
     assert(String.length blk > 0);
     assert(blk_sz > 0);
