@@ -21,7 +21,7 @@ let return = monad_ops.return
 let fstore_ref_to_with_state (r:'part_of_state Tjr_store.Refs.r) = 
   let get_state () = sp_of_fun (fun t -> (t,t)) in
   let _ = get_state in
-  let set_state s = sp_of_fun (fun s -> ((),s)) in
+  let set_state s = sp_of_fun (fun _ -> ((),s)) in
   let with_state (type a)
       (f: state:'part_of_state -> 
        set_state:('part_of_state -> (unit,fstore_passing)m) -> 
