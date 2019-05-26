@@ -1,12 +1,17 @@
 (library
   (name tjr_fs_shared)
   (public_name tjr_fs_shared)
+
   (preprocess (pps ppx_deriving_yojson ppx_bin_prot))
-  (flags (:standard "-w" "-39"))  ; -27 is unused var, -39 is unused rec flag
+
+  ; -27 is unused var, -39 is unused rec flag
+  (flags (:standard -w -26-27-39 -open Tjr_lib_core -open Tjr_lib -open Tjr_monad))
+
+
+  ; we include monad so we don't have to explicitly depend on it in
+  ; later packages
   (libraries 
     bin_prot ppx_bin_prot yojson ppx_deriving_yojson 
-    tjr_lib tjr_monad))  
-
-; we include monad so we don't have to explicitly depend on it in later packages
+    tjr_lib tjr_monad))
 
 (include_subdirs unqualified)
