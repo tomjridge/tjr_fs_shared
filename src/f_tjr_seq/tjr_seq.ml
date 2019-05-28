@@ -1,7 +1,7 @@
 (** An implementation of functional sequences; for testing *)
 
 module Type = struct
-  type ('a,'t) test_seq = {
+  type ('a,'t) tjr_seq_op = {
     take_and_drop: int -> 't -> 'a list * 't;  (* if the list is empty, the seq should be empty *)
   }
 end
@@ -12,7 +12,7 @@ include Type
 (** int sequence from l to h *)
 let ( -- ) = 
   let rec take n (l,h) =
-    match n>0 && l < h with
+    match n>0 && l <= h with
     | true -> l::take (n-1) (l+1,h)
     | false -> []
   in
