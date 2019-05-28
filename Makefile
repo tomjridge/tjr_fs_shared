@@ -4,6 +4,9 @@ default: all
 
 -include Makefile.ocaml
 
+run_test:
+	dune exec test/test_fs_shared.exe
+
 # for auto-completion of Makefile target
 clean::
 

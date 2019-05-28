@@ -1,0 +1,7 @@
+(executable
+  (public_name "test_fs_shared")
+  (flags (:standard -open Tjr_lib_core -open Tjr_lib -open Tjr_fs_shared))
+  (libraries "tjr_fs_shared")
+)
+
+

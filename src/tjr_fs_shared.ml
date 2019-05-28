@@ -60,3 +60,6 @@ module Small_string = Small_string
 
 module Map_with_key_traversal = Map_with_key_traversal
 
+(** {2 Simple sequence type} *)
+
+module Tjr_seq = Tjr_seq
