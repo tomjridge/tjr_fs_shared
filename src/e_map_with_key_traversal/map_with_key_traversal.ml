@@ -9,7 +9,7 @@ This can be simplified:
 
 *)
 
-open Poly_map
+open Tjr_map
 
 let make_ops ~map_ops =
   let k_cmp = map_ops.k_cmp in

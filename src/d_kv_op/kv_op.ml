@@ -13,11 +13,11 @@ let ii_op2s (op:(int,int)op) =
 
 (** The type for the abstract view of the DCL. Also required by the
    make_dcl_ops function. NOTE the values are ('k,'v)op, not 'v. *)
-type ('k,'v,'map) kvop_map_ops = ('k,('k,'v)op,'map) Poly_map.map_ops
+type ('k,'v,'map) kvop_map_ops = ('k,('k,'v)op,'map) Tjr_map.map_ops
 
 (* FIXME default kv map, not kvop *)
 let default_kvop_map_ops () : ('k,'v,'map) kvop_map_ops = 
-  let open Poly_map in
+  let open Tjr_map in
   let map_ops = make_map_ops Pervasives.compare in
   map_ops
 (*

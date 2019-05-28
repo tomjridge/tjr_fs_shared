@@ -1,7 +1,7 @@
 (** A monad which passes a functional store. FIXME move elsewhere?
    NOTE used for testing dmap etc, but common in other repos *)
 
-type fstore = Store.t
+type fstore = Tjr_store.t
 type fstore_passing = fstore State_passing.state_passing (* monad type is ('a,t) m *)
 
 let monad_ops : fstore_passing monad_ops = 
@@ -18,7 +18,7 @@ let return = monad_ops.return
    interleaving in the set_state impl; we only mutate the part of the
    state corresponding to the ref; FIXME we need to make clear which
    steps are atomic *)
-let fstore_ref_to_with_state (r:'part_of_state Tjr_lib_core.Store.Refs.r) = 
+let fstore_ref_to_with_state (r:'part_of_state Tjr_store.Refs.r) = 
   let get_state () = sp_of_fun (fun t -> (t,t)) in
   let _ = get_state in
   let set_state s = sp_of_fun (fun _ -> ((),s)) in
@@ -28,10 +28,10 @@ let fstore_ref_to_with_state (r:'part_of_state Tjr_lib_core.Store.Refs.r) =
        (a,fstore_passing) m)
     : (a,fstore_passing)m = 
     get_state () >>= fun fstore -> 
-    fstore |> Store.get r |> fun part -> 
+    fstore |> Tjr_store.get r |> fun part -> 
     f ~state:part
       ~set_state:(fun part -> get_state () >>= fun fstore -> 
-        fstore |> Store.set r part |> fun fstore ->
+        fstore |> Tjr_store.set r part |> fun fstore ->
         set_state fstore)        
   in
   { with_state }
