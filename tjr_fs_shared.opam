@@ -17,6 +17,7 @@ dev-repo     : "git://github.com/tomjridge/tjr_fs_shared.git"
 depends: [ 
   "tjr_lib" 
   "tjr_monad"
+  "tjr_profile"
 ]
 
 # ----------------------------------------------------------------------
