@@ -1,7 +1,7 @@
 opam-version : "2.0"
 name         : "tjr_fs_shared"
 version      : "0.0.1"
-synopsis     : "Shared definitions for filesystem work."
+synopsis     : "Shared definitions for filesystem work"
 
 # ----------------------------------------------------------------------
 
@@ -9,7 +9,7 @@ authors      : "Tom Ridge <tom.j.ridge@googlemail.com>"
 maintainer   : "Tom Ridge <tom.j.ridge@googlemail.com>"
 homepage     : "https://github.com/tomjridge/tjr_fs_shared"
 bug-reports  : "https://github.com/tomjridge/tjr_fs_shared/issues"
-dev-repo     : "git://github.com/tomjridge/tjr_fs_shared.git"
+dev-repo     : "git+https://github.com/tomjridge/tjr_fs_shared.git"
 
 
 # ----------------------------------------------------------------------
