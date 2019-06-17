@@ -1,11 +1,8 @@
 (** An implementation of functional sequences; for testing *)
 
-module Type = struct
-  type ('a,'t) tjr_seq_op = {
-    take_and_drop: int -> 't -> 'a list * 't;  (* if the list is empty, the seq should be empty *)
-  }
-end
-include Type
+type ('a,'t) tjr_seq_type = {
+  take_and_drop: int -> 't -> 'a list * 't;  (* if the list is empty, the seq should be empty *)
+}
 
 (* implement a sequence from l to h by a pair (l,h) *)
 
@@ -21,6 +18,8 @@ let ( -- ) =
     xs,(l+List.length xs,h)
   in
   fun l h -> { take_and_drop },(l,h)
+
+let _ = ( -- )
 
 let rec map f {take_and_drop} = {
   (* take=(fun n t -> take n t |> List.map f); *)
@@ -38,7 +37,6 @@ let iter f {take_and_drop;_} t =
   in
   g t
 
-
 let test = 
   Global.register ~name:"Tjr_seq.test" 
     (fun () -> 
@@ -53,5 +51,5 @@ let test =
        assert(take_and_drop 2 seq |> function [202;204],_ -> true | _ -> false);
        Printf.printf "Tjr_seq.test: all tests pass!\n%!"
     )
-       
+
   
