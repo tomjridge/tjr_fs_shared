@@ -25,7 +25,7 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 
 (** {2 Functional-store-passing monad} *)
 
-type fstore = Fstore_passing.fstore
+(* type fstore = Fstore_passing.fstore *)
 type fstore_passing = Fstore_passing.fstore_passing
 let fstore_passing_monad_ops = Fstore_passing.monad_ops
 module Fstore_passing = Fstore_passing
