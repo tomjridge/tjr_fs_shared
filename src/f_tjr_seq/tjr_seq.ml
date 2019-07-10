@@ -17,7 +17,7 @@ let ( -- ) =
     take n (l,h) |> fun xs ->
     xs,(l+List.length xs,h)
   in
-  fun l h -> { take_and_drop },(l,h)
+  fun (l:int) (h:int) -> { take_and_drop },(l,h)
 
 let _ = ( -- )
 
