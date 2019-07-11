@@ -63,3 +63,38 @@ module Map_with_key_traversal = Map_with_key_traversal
 (** {2 Simple sequence type} *)
 
 module Tjr_seq = Tjr_seq
+
+
+(** {2 Profilers, controlled at compile time} *)
+
+(** Various profilers. Profilers are controlled by a flag. *)
+
+(* The following should define the variable PROFILING_ENABLED *)
+[%%import "/tmp/optcomp_config.ml"]
+
+[%%if PROFILING_ENABLED]
+
+(** Profiling is ENABLED! *)
+let profiling_enabled = true
+let _ = Tjr_profile_with_core.initialize()
+[%%else]
+
+(** Profiling is DISABLED! *)
+let profiling_enabled = false
+[%%endif]
+
+(* FIXME Make_profiler should probably be in Tjr_fs_shared *)
+module Make_profiler() = 
+struct
+[%%if PROFILING_ENABLED]
+(* NOTE this code parallels that in Tjr_profile_with_core *)
+let internal_profiler = Tjr_profile.make_string_profiler ()
+let mark = internal_profiler.mark
+let profile s f = mark s; f() |> fun r -> mark (s^"'"); r
+[%%else]
+let internal_profiler = Tjr_profile.dummy_profiler
+let mark (s:string) = () 
+let profile (s:string) (f:unit -> 'a) = f ()
+[%%endif]
+end
+
