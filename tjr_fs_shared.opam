@@ -18,7 +18,6 @@ depends: [
   "tjr_lib" 
   "tjr_monad"
   "tjr_profile"
-  "tjr_profile_with_core"
 ]
 
 # ----------------------------------------------------------------------

@@ -91,10 +91,11 @@ struct
 let internal_profiler = Tjr_profile.make_string_profiler ()
 let mark = internal_profiler.mark
 let profile s f = mark s; f() |> fun r -> mark (s^"'"); r
+let print_summary () = internal_profiler.print_summary()
 [%%else]
-let internal_profiler = Tjr_profile.dummy_profiler
 let mark (s:string) = () 
 let profile (s:string) (f:unit -> 'a) = f ()
+let print_summary () = ()
 [%%endif]
 end
 

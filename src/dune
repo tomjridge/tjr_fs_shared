@@ -12,6 +12,6 @@
   ; later packages
   (libraries 
     bin_prot ppx_bin_prot yojson ppx_deriving_yojson 
-    tjr_lib tjr_monad ppx_optcomp tjr_profile_with_core))
+    tjr_lib tjr_monad ppx_optcomp))
 
 (include_subdirs unqualified)
