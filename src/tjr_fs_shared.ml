@@ -76,7 +76,8 @@ module Tjr_seq = Tjr_seq
 
 (** Profiling is ENABLED! *)
 let profiling_enabled = true
-let _ = Tjr_profile_with_core.initialize()
+let _ = Printf.printf "%s: profiling enabled\n" __MODULE__
+
 [%%else]
 
 (** Profiling is DISABLED! *)
