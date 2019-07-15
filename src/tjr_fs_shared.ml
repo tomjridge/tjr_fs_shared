@@ -100,3 +100,24 @@ let print_summary () = ()
 [%%endif]
 end
 
+
+
+(** {2 Testing, controlled at compile time} *)
+
+(** NOTE we use optcomp to set variable [TESTING_ENABLED] to true or false. *)
+
+[%%if TESTING_ENABLED]
+
+(** Testing is ENABLED! *)
+let testing_enabled = true
+let test f = f ()
+let assert_ f = assert(f())
+
+[%%else]
+
+(** Testing is DISABLED! *)
+let testing_enabled = false
+let test f = ()
+let assert_ f = ()
+[%%endif]
+
