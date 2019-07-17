@@ -65,59 +65,23 @@ module Map_with_key_traversal = Map_with_key_traversal
 module Tjr_seq = Tjr_seq
 
 
-(** {2 Profilers, controlled at compile time} *)
+(** {2 Testing, controlled by optional config file "shared_config.json"} *)
 
-(** Various profilers. Profilers are controlled by a flag. *)
+module Internal = struct
+  module C = struct
+    type config = {
+      testing_enabled:bool
+    } [@@deriving yojson]
 
-(* The following should define the variable PROFILING_ENABLED *)
-[%%import "/tmp/optcomp_config.ml"]
+    let default_config=Some{testing_enabled=false}
+    let filename = "shared_config.json"
+  end
 
-[%%if PROFILING_ENABLED]
-
-(** Profiling is ENABLED! *)
-let profiling_enabled = true
-let _ = Printf.printf "%s: profiling enabled\n" __MODULE__
-
-[%%else]
-
-(** Profiling is DISABLED! *)
-let profiling_enabled = false
-[%%endif]
-
-(* FIXME Make_profiler should probably be in Tjr_fs_shared *)
-module Make_profiler() = 
-struct
-[%%if PROFILING_ENABLED]
-(* NOTE this code parallels that in Tjr_profile_with_core *)
-let internal_profiler = Tjr_profile.make_string_profiler ()
-let mark = internal_profiler.mark
-let profile s f = mark s; f() |> fun r -> mark (s^"'"); r
-let print_summary () = internal_profiler.print_summary()
-[%%else]
-let mark (s:string) = () 
-let profile (s:string) (f:unit -> 'a) = f ()
-let print_summary () = ()
-[%%endif]
+  include Tjr_config.Make(C)
 end
 
+let testing_enabled = Internal.config.testing_enabled
+let test = (if testing_enabled then (fun f -> f ()) [@inline] else fun f -> ()) 
+let assert_ = (if testing_enabled then (fun f -> assert(f())) [@inline] else fun f -> ())
 
-
-(** {2 Testing, controlled at compile time} *)
-
-(** NOTE we use optcomp to set variable [TESTING_ENABLED] to true or false. *)
-
-[%%if TESTING_ENABLED]
-
-(** Testing is ENABLED! *)
-let testing_enabled = true
-let test f = f ()
-let assert_ f = assert(f())
-
-[%%else]
-
-(** Testing is DISABLED! *)
-let testing_enabled = false
-let test f = ()
-let assert_ f = ()
-[%%endif]
 
