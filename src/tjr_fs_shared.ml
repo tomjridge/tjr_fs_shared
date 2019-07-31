@@ -85,3 +85,6 @@ let test = (if testing_enabled then (fun f -> f ()) [@inline] else fun f -> ())
 let assert_ = (if testing_enabled then (fun f -> assert(f())) [@inline] else fun f -> ())
 
 
+(** {2 A record for the pair of an initial state and related operations} *)
+
+type ('a,'b) initial_state_and_ops = {initial_state:'a; ops:'b}
