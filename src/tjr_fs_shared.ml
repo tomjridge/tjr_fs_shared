@@ -45,8 +45,8 @@ module Kv_op = Kv_op
 (** FIXME do we want to include this type at top level? *)
 (* include Map_ops_type *)
 
-(** Map operations find,ins,del, in; insert_all; make_insert_many *)
-module Shared_map_ops = Map_ops
+(** Map operations find,ins,del, in; insert_all; make_insert_many FIXME? note may clash with other "map_ops" *)
+module Map_ops = Map_ops
 
 
 
