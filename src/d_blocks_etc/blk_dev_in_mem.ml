@@ -1,9 +1,9 @@
 (** Simple in-memory block device. *)
 
-open Blk_dev_ops_type
+open Blk_intf
 
 (** NOTE blk_sz is not checked - any size blk can be used *)
-let make ~monad_ops ~blk_sz ~with_state = 
+let make_blk_dev_in_mem ~monad_ops ~blk_sz ~with_state = 
   let ( >>= ) = monad_ops.bind in
   let return = monad_ops.return in   
   let with_state = with_state.with_state in
@@ -21,4 +21,4 @@ let make ~monad_ops ~blk_sz ~with_state =
 
 
 
-let _ = make
+let _ = make_blk_dev_in_mem

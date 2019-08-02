@@ -4,23 +4,18 @@ A collection of the main types provided by this library. *)
 
 (** {2 Block-related types } *)
 
-type blk_sz = Blk_sz.blk_sz
-module Blk_sz = Blk_sz
-let bsz_to_int = Blk_sz.to_int
-let bsz_of_int = Blk_sz.of_int
-
-include Block_ops_type
-
-include Blk_dev_ops_type.Export
+include Blk_intf
 
 
 (** {2 Block-related implementations} *)
 
-module String_block_ops = Block_ops.String_block_ops
+module Common_blk_ops = Common_blk_ops
 
 module Blk_dev_in_mem = Blk_dev_in_mem
+
 module Blk_dev_on_fd = Blk_dev_on_fd
 
+module Common_blk_layers = Common_blk_layers
 
 
 (** {2 Functional-store-passing monad} *)
