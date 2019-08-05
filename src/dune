@@ -12,6 +12,8 @@
   ; later packages
   (libraries 
     bin_prot ppx_bin_prot yojson ppx_deriving_yojson 
-    tjr_lib tjr_monad tjr_profile))
+    tjr_lib tjr_monad tjr_profile
+    lwt lwt.unix ;; for lwt blockdev
+))
 
 (include_subdirs unqualified)
