@@ -35,14 +35,14 @@ type ('k,'v) op = ('k,'v) Kv_op_type.op =
 module Kv_op = Kv_op
 
 
-(** {2 Map ops (from shared) } *)
+(** {2 (Shared) Map ops } *)
 
 (** FIXME do we want to include this type at top level? *)
 (* include Map_ops_type *)
 
-(** Map operations find,ins,del, in; insert_all; make_insert_many FIXME? note may clash with other "map_ops" *)
-module Map_ops = Map_ops
-
+(** Map operations find,ins,del, in; insert_all; make_insert_many FIXME? note may clash with other "map_ops" so we don't include at the top-level *)
+(* module Map_ops = Map_ops *)
+module Shared_map_ops = Shared_map_ops
 
 
 (** {2 Small strings, leq 256 bytes} *)

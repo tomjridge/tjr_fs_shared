@@ -1,4 +1,13 @@
-(* open Tjr_monad.Types *)
+(** Map operations, as they related to the B-tree; see also
+   "extra_map_ops" in Tjr_btree.Btree_intf *)
+
+(** Simple map operations: find, insert and delete (no insert_many). *)
+type ('k,'v,'t) fid_map_ops = {
+  find : 'k -> ('v option, 't) Tjr_monad.m;
+  insert : 'k -> 'v -> (unit, 't) Tjr_monad.m;
+  delete : 'k -> (unit, 't) Tjr_monad.m;
+}
+
 
 (** Map operations: find, insert, [insert_many] and delete. 
 
