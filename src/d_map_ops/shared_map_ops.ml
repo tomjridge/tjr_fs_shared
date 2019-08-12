@@ -1,11 +1,13 @@
 
 (** Simple map operations: find, insert and delete (no insert_many). *)
 module Fid_map_ops = struct
+
   type ('k,'v,'t) fid_map_ops = {
-    find : 'k -> ('v option, 't) Tjr_monad.m;
-    insert : 'k -> 'v -> (unit, 't) Tjr_monad.m;
-    delete : 'k -> (unit, 't) Tjr_monad.m;
+    find : 'k -> ('v option, 't) m;
+    insert : 'k -> 'v -> (unit, 't) m;
+    delete : 'k -> (unit, 't) m;
   }
+
 end
 
 module Map_ops_type = struct
