@@ -66,6 +66,16 @@ type ('blk_id,'blk,'t) blk_dev_ops = {
   read: blk_id:'blk_id -> ('blk,'t) m;
 }
 
+module Internal_unlabelled_blk_dev_ops = struct
+
+  type ('blk_id,'blk,'t) blk_dev_ops = {
+    blk_sz: blk_sz; 
+    write: 'blk_id -> 'blk -> (unit,'t) m;
+    read: 'blk_id -> ('blk,'t) m;
+  }
+
+end
+
 
 (** Wrap up common instances. Keep 'dev abstract since we may need to stage the construction. *)
 type ('blk,'dev) blk_layer = {

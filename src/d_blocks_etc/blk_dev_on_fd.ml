@@ -22,6 +22,7 @@ end
   let read ~(blk_ops:'blk blk_ops) ~fd () = 
     let blk_sz = blk_ops.blk_sz |> Blk_sz.to_int in
     fun ~blk_id -> 
+      assert(blk_id>=0);
       ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET);
       let buf = Bytes.make blk_sz (Char.chr 0) in 
       let n = Unix.read fd buf 0 blk_sz in
@@ -37,6 +38,7 @@ end
     fun ~blk_id ~blk -> 
       let blk = blk_ops.to_string blk in
       assert(String.length blk > 0);
+      assert(blk_id>=0);
       ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET);
       let buf = blk |> Bytes.of_string in
       (* Printf.printf "%d %d\n%!" (String.length blk) blk_sz; *)
@@ -85,6 +87,7 @@ end
         let blk_sz = blk_ops.blk_sz |> Blk_sz.to_int in
         fun ~fd ~blk_id -> 
           begin
+            assert(blk_id>=0);
             UU.lseek fd (blk_id * blk_sz) SEEK_SET >>= fun _ -> 
             let buf = Bytes.make blk_sz (Char.chr 0) in 
             UU.read fd buf 0 blk_sz >>= fun n -> 
@@ -105,6 +108,7 @@ end
             let blk = blk_ops.to_string blk in
             assert(String.length blk > 0);
             assert(blk_sz > 0);
+            assert(blk_id>=0);           
             UU.lseek fd (blk_id * blk_sz) SEEK_SET >>= fun _ -> 
             let buf = blk |> Bytes.of_string in
             (* Printf.printf "%d %d\n%!" (String.length blk) blk_sz; *)
