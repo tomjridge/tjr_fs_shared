@@ -29,16 +29,18 @@ let blk_sz_4096 = Blk_sz.blk_sz_4096
 
 (** This is a common instance of blk_id; we don't open it by default
    because we want most code to be independent of the exact repn. of
-   blk_id *)
+   blk_id NOTE do not open this module *)
 module Blk_id_as_int : sig 
   type blk_id[@@deriving bin_io]
   val of_int: int -> blk_id
   val to_int: blk_id -> int
+  val incr: blk_id -> blk_id
 end = struct
   open Bin_prot.Std
   type blk_id = int[@@deriving bin_io]
   let of_int x = x
   let to_int x = x
+  let incr x = x+1
 end
 
 (* type blk_id = Blk_id.blk_id *)
