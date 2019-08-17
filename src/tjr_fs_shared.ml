@@ -28,10 +28,13 @@ module Fstore_passing = Fstore_passing
 
 (** {2 Kv ops} *)
 
-type ('k,'v) op = ('k,'v) Kv_op_type.op = 
+(* NOTE we don't want to pollute the namespace with all the @@deriving
+   functions so we dont include Kv_op_type directly *)
+type ('k,'v) kvop = ('k,'v) Kv_op_type.kvop = 
   | Insert of 'k * 'v
   | Delete of 'k
 
+type ('k,'v) kvop_map = ('k,'v) Kv_op_type.kvop_map
 module Kv_op = Kv_op
 
 

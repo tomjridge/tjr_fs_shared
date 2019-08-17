@@ -9,8 +9,11 @@ Additional functionality in module {!Kv_op}. Prefer to open that module
    doesn't change the on-disk state).
 
 NOTE we may want to have variants of this with further operations *)
-type ('k,'v) op = 
+type ('k,'v) kvop = 
   | Insert of 'k * 'v 
   | Delete of 'k 
 [@@deriving bin_io, yojson]
 
+
+(** Abbreviation *)
+type ('k,'v) kvop_map = ('k,('k,'v)kvop,unit)Tjr_map.map
