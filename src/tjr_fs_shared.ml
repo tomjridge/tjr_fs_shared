@@ -2,6 +2,11 @@
 
 A collection of the main types provided by this library. *)
 
+(** {2 Intf types that don't belong anywhere else} *)
+
+include Shared_intf
+
+
 (** {2 Block-related types } *)
 
 include Blk_intf
@@ -63,6 +68,11 @@ module Map_with_key_traversal = Map_with_key_traversal
 module Tjr_seq = Tjr_seq
 
 
+(** {2 Write back cache} *)
+
+module Write_back_cache = Write_back_cache
+include Write_back_cache
+
 (** {2 Testing, controlled by optional config file "shared_config.json"} *)
 
 module Internal = struct
@@ -83,6 +93,3 @@ let test = (if testing_enabled then (fun f -> f ()) [@inline] else fun f -> ())
 let assert_ = (if testing_enabled then (fun f -> assert(f())) [@inline] else fun f -> ())
 
 
-(** {2 A record for the pair of an initial state and related operations} *)
-
-type ('a,'b) initial_state_and_ops = {initial_state:'a; ops:'b}
