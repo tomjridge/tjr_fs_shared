@@ -76,12 +76,19 @@ end
         assert(blk_sz > 0);
         fun ~blk_id ~blk -> 
           write ~blk_id ~blk |> return
+
+      let join ~monad_ops (xs:(unit,'t) m list) = monad_ops.return ()
     end
 
     module Lwt_ = struct
       module UU = Lwt_unix 
 
       open Lwt
+
+      let join xs = (List.map Tjr_monad.With_lwt.to_lwt xs)
+                    |> Lwt.join
+                    |> Tjr_monad.With_lwt.from_lwt
+      (* FIXME this mapping of an (essentially) identity function is poor *)
 
       let read ~(blk_ops:'blk blk_ops) =
         let blk_sz = blk_ops.blk_sz |> Blk_sz.to_int in
@@ -134,7 +141,11 @@ end
       let write ~blk_id ~blk = 
         L.write ~blk_ops ~fd ~blk_id:(Blk_id_.to_int blk_id) ~blk 
       in
-      { blk_sz; read; write }
+      let write_many writes = 
+        writes |> List.map (fun (blk_id,blk) -> write ~blk_id ~blk)
+        |> L.join
+      in
+      { blk_sz; read; write; write_many }
   end
 
   module With_unix = struct
@@ -147,7 +158,10 @@ end
       let read ~blk_id = read ~blk_id:(Blk_id_.to_int blk_id) in
       let write = U.write ~monad_ops ~blk_ops ~fd () in
       let write ~blk_id ~blk = write ~blk_id:(Blk_id_.to_int blk_id) ~blk in
-      { blk_sz; read; write }
+      let write_many writes = 
+        writes |> List.map (fun (blk_id,blk) -> write ~blk_id ~blk) |> U.join ~monad_ops
+      in
+      { blk_sz; read; write; write_many }
   end
 
   module Export = struct

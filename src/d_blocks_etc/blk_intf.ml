@@ -66,8 +66,10 @@ type ('blk_id,'blk,'t) blk_dev_ops = {
   blk_sz: blk_sz; 
   write: blk_id:'blk_id -> blk:'blk -> (unit,'t) m;
   read: blk_id:'blk_id -> ('blk,'t) m;
+  write_many: ('blk_id*'blk)list -> (unit,'t) m  (* FIXME may want to make this a seq? *)
 }
 
+(* This is used for talks, to avoid explaining labelled args *)
 module Internal_unlabelled_blk_dev_ops = struct
 
   type ('blk_id,'blk,'t) blk_dev_ops = {

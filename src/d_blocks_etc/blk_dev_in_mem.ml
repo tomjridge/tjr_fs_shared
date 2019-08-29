@@ -17,7 +17,11 @@ let make_blk_dev_in_mem ~monad_ops ~blk_sz ~with_state =
     with_state (fun ~state:s ~set_state ->
         return (Tjr_map.With_pervasives_compare.find blk_id s))
   in
-  { blk_sz; read; write }
+  let write_many writes = 
+    writes |> List.map (fun (blk_id,blk) -> write ~blk_id ~blk)
+    |> join_seq ~monad_ops
+  in
+  { blk_sz; read; write; write_many }
 
 
 
