@@ -19,6 +19,7 @@ depends: [
   "tjr_monad"
   "tjr_profile"
   "lwt" # for lwt block device
+  "lru" # for caching
 ]
 
 # ----------------------------------------------------------------------
