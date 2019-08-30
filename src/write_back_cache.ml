@@ -21,6 +21,7 @@ The operations:
 - trim delta - try to pop delta lru-elts; the delta arg is optional
   (it uses the value provided on create by default); the returned list
   only contains the dirty entries (so we don't handle clean entries)
+- trim_all - trim all elts; return filtered and an empty wbc
 - promote: to touch a key so that it has just been used (find does not
   automatically promote... perhaps it should?)
 
@@ -38,6 +39,7 @@ type ('k,'v,'a,'t) write_back_cache_ops = {
   trim_1           : 't -> (('k * ('v * bool))*'t) option;
   trim             : ?filter_map:('k * ('v * bool) -> 'a option) -> ?delta:int -> 't -> 'a list * 't;
   trim_if_over_cap : ?filter_map:('k * ('v * bool) -> 'a option) -> 't -> ('a list * 't) option; (* could be 'b *)
+  trim_all         : ?filter_map:('k * ('v * bool) -> 'a option) -> 't -> ('a list * 't); 
   size             : 't -> int
 }
 
@@ -77,7 +79,8 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
   (** NOTE by default trim only returns the dirty elements *)
   let make_write_back_cache ~cap ~delta = 
     let delta0 = delta in
-    let trim ?(filter_map=(fun (k,(v,dirty)) -> Some(k,v))) ?(delta=delta0) t : ('a list * Lru.t) =
+    let filter_map = fun (k,(v,dirty)) -> if dirty then Some(k,v) else None in
+    let trim ?(filter_map=filter_map) ?(delta=delta0) t : ('a list * Lru.t) =
       (t,[],0) |> iter_k (fun ~k (t,acc,count) -> 
           match count >= delta with
           | true -> (acc,t)
@@ -89,13 +92,16 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
                   k (t,acc',count+1)))
         )
     in
-    let trim_if_over_cap ?(filter_map=(fun (k,(v,dirty)) -> Some(k,v))) t = 
+    let trim_if_over_cap ?(filter_map=filter_map) t = 
       match size t > cap with
       | false -> None
       | true -> Some(trim ~filter_map t)
     in
+    let trim_all ?(filter_map=filter_map) t =
+      trim ~filter_map ~delta:cap t
+    in
     let create = create ~cap in
-    { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; size }}
+    { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size }}
 
   let _ 
 : cap:int ->
