@@ -56,7 +56,7 @@ module Internal = struct
   type ('a,'q) free_list = {
     free_from : 'a;
     queue     : 'q;
-  } [@@deriving bin_io]
+  } [@@deriving bin_io, sexp]
      
   let alloc ~succ (x:('a,'q)free_list) = 
     match fq.is_empty x.queue with
@@ -91,7 +91,7 @@ module Make(): sig
   val create_free_list : queue:int list -> free_from:int -> abstract_free_list
   val free_list_ops    : (int,abstract_free_list) free_list_ops
   module Free_list_with_bin_prot : sig
-    type t = (int,int list)free_list [@@deriving bin_io]
+    type t = (int,int list)free_list [@@deriving bin_io, sexp]
     val to_t   : abstract_free_list -> t
     val from_t : t -> abstract_free_list
   end
@@ -103,7 +103,8 @@ end = struct
 
   module Free_list_with_bin_prot = struct
     open Bin_prot.Std
-    type t = (int,int list)free_list [@@deriving bin_io]
+    open Sexplib.Std
+    type t = (int,int list)free_list [@@deriving bin_io, sexp]
     let to_t = fun {free_from;queue} -> {free_from;queue=queue |> fq.to_list}
     let from_t = fun {free_from;queue} -> {free_from;queue=queue|>fq.of_list}
   end
@@ -136,6 +137,10 @@ let test () =
   (alloc fl |> function
     | Some(6,fl) -> fl
     | _ -> failwith __LOC__) |> fun fl ->
+  (free 2 fl) |> fun fl -> 
+  (free 1 fl) |> fun fl -> 
+  Printf.printf "Example free list: %s\n" 
+    (Sexplib.Sexp.to_string_hum Free_list_with_bin_prot.(fl|>to_t|>sexp_of_t));
   Printf.printf "Free_list: all tests pass!\n";
   ()
 
