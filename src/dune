@@ -15,6 +15,7 @@
     tjr_lib tjr_monad tjr_profile
     lwt lwt.unix ;; for lwt blockdev
     lru
+    ke ;; for functional queues
 ))
 
 (include_subdirs unqualified)

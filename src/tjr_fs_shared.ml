@@ -73,6 +73,17 @@ module Tjr_seq = Tjr_seq
 module Write_back_cache = Write_back_cache
 include Write_back_cache
 
+
+(** {2 Free list} *)
+
+module Free_list = Free_list
+type abstract_free_list = Free_list.abstract_free_list
+
+(** NOTE don't expose free_list_ops record type since alloc and free are overloaded *)
+
+let free_list_ops : (int,abstract_free_list)Free_list.free_list_ops = Free_list.free_list_ops
+module Free_list_with_bin_prot = Free_list.Free_list_with_bin_prot
+
 (** {2 Testing, controlled by optional config file "shared_config.json"} *)
 
 module Internal = struct
@@ -91,5 +102,3 @@ end
 let testing_enabled = Internal.config.testing_enabled
 let test = (if testing_enabled then (fun f -> f ()) [@inline] else fun f -> ()) 
 let assert_ = (if testing_enabled then (fun f -> assert(f())) [@inline] else fun f -> ())
-
-

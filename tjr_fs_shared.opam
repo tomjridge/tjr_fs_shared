@@ -20,6 +20,7 @@ depends: [
   "tjr_profile"
   "lwt" # for lwt block device
   "lru" # for caching
+  "ke"  # for functional queues
 ]
 
 # ----------------------------------------------------------------------
