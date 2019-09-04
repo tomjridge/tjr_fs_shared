@@ -46,10 +46,14 @@ end
 (* type blk_id = Blk_id.blk_id *)
 
 
-(** NOTE since blk_sz is expected to be fixed for a given blk type, we
+(** 
+
+NOTE Conversion to a blk is expected (and the common instances do,
+indeed!) to pad if the string/bytes are not long enough.
+
+NOTE since blk_sz is expected to be fixed for a given blk type, we
    don't include as a parameter on the main interface methods 
 
-FIXME get_blk_sz should be just blk_sz?
 *)
 type 'blk blk_ops = {
   blk_sz: blk_sz; 
