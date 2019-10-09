@@ -22,6 +22,8 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 
 module Common_blk_layers = Common_blk_layers
 
+module Common_blk_stores = Common_blk_stores
+
 
 (** {2 Functional-store-passing monad} *)
 

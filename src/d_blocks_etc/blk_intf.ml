@@ -43,11 +43,7 @@ end = struct
   let incr x = x+1
 end
 
-(* type blk_id = Blk_id.blk_id *)
-
-
 (** 
-
 NOTE Conversion to a blk is expected (and the common instances do,
 indeed!) to pad if the string/bytes are not long enough.
 
@@ -56,37 +52,69 @@ NOTE since blk_sz is expected to be fixed for a given blk type, we
 
 *)
 type 'blk blk_ops = {
-  blk_sz: blk_sz; 
+  blk_sz    : blk_sz; 
 
-  of_string: string -> 'blk;
-  to_string: 'blk -> string;
+  of_string : string -> 'blk;
+  to_string : 'blk -> string;
 
-  of_bytes: bytes -> 'blk;
-  to_bytes: 'blk -> bytes;
+  of_bytes  : bytes -> 'blk;
+  to_bytes  : 'blk -> bytes;
 }
 
-(** This variant of blk_dev_ops has a fixed block device. *)
+(** A block device: read and write blocks. *)
 type ('blk_id,'blk,'t) blk_dev_ops = {
-  blk_sz: blk_sz; 
-  write: blk_id:'blk_id -> blk:'blk -> (unit,'t) m;
-  read: blk_id:'blk_id -> ('blk,'t) m;
-  write_many: ('blk_id*'blk)list -> (unit,'t) m  (* FIXME may want to make this a seq? *)
+  blk_sz     : blk_sz; 
+  write      : blk_id:'blk_id -> blk:'blk -> (unit,'t) m;
+  read       : blk_id:'blk_id -> ('blk,'t) m;
+  write_many : ('blk_id*'blk)list -> (unit,'t) m  (* FIXME may want to make this a seq? *)
 }
+
 
 (* This is used for talks, to avoid explaining labelled args *)
 module Internal_unlabelled_blk_dev_ops = struct
-
   type ('blk_id,'blk,'t) blk_dev_ops = {
     blk_sz: blk_sz; 
     write: 'blk_id -> 'blk -> (unit,'t) m;
     read: 'blk_id -> ('blk,'t) m;
   }
-
 end
 
 
-(** Wrap up common instances. Keep 'dev abstract since we may need to stage the construction. *)
-type ('blk,'dev) blk_layer = {
-  blk_ops: 'blk blk_ops;
-  blk_dev_ops: 'dev
-}
+(** A blk layer has blk_ops and blk_dev_ops *)
+module Blk_layer = struct
+  (** Keep 'dev abstract since we may need to stage the
+     construction. *)
+  type ('blk,'dev) blk_layer = {
+    blk_ops: 'blk blk_ops;
+    blk_dev_ops: 'dev
+  }
+end
+
+(** NOTE to access the field names, open Blk_layer *)
+type ('blk,'dev) blk_layer = ('blk,'dev) Blk_layer.blk_layer
+
+
+module Blk_allocator_ops_type = struct
+  (** A type for managing the free space on the disk. *)
+
+  (** NOTE we assume alloc never fails, or that error is handled
+      elsewhere in the monad; fields were named alloc and free *)
+  type ('blk_id,'t) blk_allocator_ops = {
+    blk_alloc : unit -> ('blk_id,'t) m; 
+    blk_free  : 'blk_id -> (unit,'t) m;
+  }
+end
+include Blk_allocator_ops_type
+
+
+(** A block store is like a block layer, but also includes an allocator *)
+module Blk_store = struct
+  type ('blk_id,'blk,'sync,'close,'t) blk_store = {
+    blk_ops           : 'blk blk_ops;
+    blk_dev_ops       : ('blk_id,'blk,'t)blk_dev_ops;
+    blk_allocator_ops : ('blk_id,'t) blk_allocator_ops;
+  }
+end
+
+(** NOTE to access field names, open Blk_store *)
+type ('blk_id,'blk,'sync,'close,'t) blk_store = ('blk_id,'blk,'sync,'close,'t) Blk_store.blk_store 

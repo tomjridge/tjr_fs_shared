@@ -1,6 +1,7 @@
 (** A collection of common block instances. FIXME use a GADT or similar to cut down the number of variations *)
 
 open Blk_intf
+open Blk_layer
 
 (* A block layer using string blocks, and blk dev on fd *)
 let blk_layer_unix_string_fd ~blk_sz = 

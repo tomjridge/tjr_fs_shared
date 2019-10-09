@@ -1,0 +1,5 @@
+
+(executable
+  (name "blk_store")
+  (libraries tjr_fs_shared)
+  )
