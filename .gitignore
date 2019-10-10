@@ -12,3 +12,4 @@ _build/
 /tjr_fs_shared.install
 /dune-project
 .merlin
+/blk_store.exe
