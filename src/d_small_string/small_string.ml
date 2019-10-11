@@ -7,6 +7,8 @@ Really only for testing.
 module Internal_ss : sig
   (** The type of small strings *)
   type ss [@@deriving bin_io, yojson]
+
+
   (** For this type, max_length is 256 *)
   val max_length: int
   val to_string: ss -> string
