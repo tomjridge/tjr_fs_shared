@@ -20,6 +20,7 @@ FIXME at the moment we don't do anything with index.json
 let make_blk_store_from_directory ~monad_ops ~dir ~init = 
   let module A = struct
 
+    (* NOTE this is an internal type only exposed in the backing file *)
     type blk_allocator = {
       min_free_blk_id: int
     } [@@deriving yojson]
@@ -125,7 +126,7 @@ let make_blk_store_from_directory ~monad_ops ~dir ~init =
     let sync_blk_allocator () =
       write_blk_allocator () |> return
 
-    let blk_allocator_ops = Blk_allocator_ops_type.{
+    let blk_allocator_ops = Blk_allocator_ops.{
         blk_alloc=(fun () -> 
           ((!r).min_free_blk_id) |> fun blk_id ->
           r:={min_free_blk_id=blk_id+1};
