@@ -40,6 +40,7 @@ module Fstore_passing = Fstore_passing
 type ('k,'v) kvop = ('k,'v) Kv_op_type.kvop = 
   | Insert of 'k * 'v
   | Delete of 'k
+    [@@deriving bin_io, yojson]
 
 type ('k,'v) kvop_map = ('k,'v) Kv_op_type.kvop_map
 module Kv_op = Kv_op

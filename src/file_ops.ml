@@ -54,7 +54,8 @@ end = struct
 
   let read_blk fd blk_index =
     let buf = Bytes.create blk_sz in
-    from_lwt(Lwt_unix.read fd buf (blk_sz*blk_index) blk_sz) >>= fun n ->
+    from_lwt (Lwt_unix.lseek fd (blk_sz*blk_index) SEEK_SET) >>= fun _ ->
+    from_lwt(Lwt_unix.read fd buf 0 blk_sz) >>= fun n ->
     assert(n=0 || n=blk_sz);
     return buf
 
