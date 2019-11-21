@@ -93,6 +93,10 @@ module Free_list_with_bin_prot = Free_list.Free_list_with_bin_prot
 module File_ops = File_ops
 include File_ops
 
+(** {2 Dependency management} *)
+
+module Depman = Depman
+
 
 (** {2 Testing, controlled by optional config file "shared_config.json"} *)
 

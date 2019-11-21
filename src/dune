@@ -16,6 +16,7 @@
     lwt lwt.unix ;; for lwt blockdev
     lru
     ke ;; for functional queues
+    alcotest ;; for testing
 ))
 
 (include_subdirs unqualified)

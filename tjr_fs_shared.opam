@@ -21,6 +21,7 @@ depends: [
   "lwt" # for lwt block device
   "lru" # for caching
   "ke"  # for functional queues
+  "alcotest" # for testing
 ]
 
 # ----------------------------------------------------------------------
