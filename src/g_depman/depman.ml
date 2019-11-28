@@ -1,7 +1,10 @@
 (** A dependency manager. At the moment this is a naive implementation
-   but perhaps it should be replaced by ocamlgraph or similar. 
+   but perhaps it should be replaced by ocamlgraph or similar.
 
-FIXME perhaps prefer pred rather than lt
+FIXME perhaps prefer pred rather than lt; perhaps prefer DAG
+   terminology (since < uses transitive closure, and <1 is not so
+   common) 
+
 *)
 
 module Internal : 

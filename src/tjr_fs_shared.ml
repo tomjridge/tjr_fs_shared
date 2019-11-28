@@ -95,7 +95,8 @@ include File_ops
 
 (** {2 Dependency management} *)
 
-module Depman = Depman
+(* module Depman = Depman *)
+module Depman2 = Depman2
 
 
 (** {2 Testing, controlled by optional config file "shared_config.json"} *)
