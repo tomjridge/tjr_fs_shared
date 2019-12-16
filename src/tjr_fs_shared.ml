@@ -76,6 +76,8 @@ module Tjr_seq = Tjr_seq
 module Write_back_cache = Write_back_cache
 include Write_back_cache
 
+module Wbc_2 = Wbc_2
+
 
 (** {2 Free list} *)
 

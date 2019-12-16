@@ -5,6 +5,9 @@ At the moment, we use the pqwy functional implementation, but this is
    production TODO).
 
 *)
+
+(* FIXME FIXME use tjr_lib_core.tjr_lru *)
+
 open Shared_intf
 
 (** 
