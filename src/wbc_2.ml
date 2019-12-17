@@ -44,13 +44,13 @@ module Make(K:Stdlib.Map.OrderedType)(V:sig type t end) = struct
 
   module V' = struct type t = V.t * bool end
 
-  module Lru = Tjr_lru.Make(K)(V')
+  module Lru = Tjr_lru.Make_lru(K)(V')
 
   let _lru_ops : (K.t,V.t*bool,Lru.Internal.t) lru_ops = Lru.lru_ops
 
   include Wbc_ops  (* so the make is self-contained *)
 
-  type t = Lru.Internal.t
+  type t = Lru.t
 
   let wbc_ops : (K.t,V.t,t) wbc_ops = 
     let Tjr_lru.Lru_ops.{ empty; is_empty; capacity; size; find; insert; delete; promote; trim_1; trim } = Lru.lru_ops in
