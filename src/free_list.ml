@@ -4,6 +4,9 @@ We use the Ke library for functional queues; in production these
    should be replaced by imperative queues of course.
 
 FIXME we should check for double free
+
+NOTE this is superseded by an implementation in imp_fs
+
  *)
 
 module Fke = Ke.Fke
