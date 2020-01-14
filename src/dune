@@ -17,6 +17,7 @@
     lru
     ke ;; for functional queues
     alcotest ;; for testing
+    bigstring ;; buffers
 ))
 
 (include_subdirs unqualified)

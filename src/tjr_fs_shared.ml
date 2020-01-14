@@ -6,6 +6,10 @@ A collection of the main types provided by this library. *)
 
 include Shared_intf
 
+(** {2 Buffers} *)
+
+module Buf = Buf
+include Buf
 
 (** {2 Block-related types } *)
 
