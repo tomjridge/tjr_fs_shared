@@ -28,6 +28,7 @@ module Common_blk_layers = Common_blk_layers
 
 module Common_blk_stores = Common_blk_stores
 
+module Blk_dev_factory = Blk_dev_factory
 
 (** {2 Functional-store-passing monad} *)
 

@@ -46,7 +46,6 @@ end
 (** use a string; size is 4096 *)
 let string_blk_ops = String_.make ~blk_sz:Blk_sz.blk_sz_4096
 
-
 module Bytes_ = struct
   let make ~blk_sz = 
     let blk_sz' = Blk_sz.to_int blk_sz in
@@ -66,7 +65,7 @@ module Bytes_ = struct
     ({ blk_sz; of_string; to_string; of_bytes; to_bytes } : bytes blk_ops)  
 end
 
-(** use bytes; size if 4096 *)
+(** use bytes; size is 4096 *)
 let bytes_blk_ops = Bytes_.make ~blk_sz:Blk_sz.blk_sz_4096
 
 
