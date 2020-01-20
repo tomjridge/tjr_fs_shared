@@ -22,6 +22,27 @@ module Buf_as_bigarray = struct
       set=(fun i c b -> set b i c; b);
       len=length;
     }
+
+  let { create; get; set; len } = ba_buf_ops
+
+  let ba_to_bytes ba = 
+    let len = len ba in
+    Bytes.init len (fun i -> get i ba)
+
+  let bytes_to_ba bs = 
+    Bigstring.init (Bytes.length bs) (fun i -> Bytes.get bs i)
+
+  let _ = bytes_to_ba
+
+  let ba_to_string ba = 
+    let len = len ba in
+    String.init len (fun i -> get i ba)
+
+  let string_to_ba s = 
+    Bigstring.init (String.length s) (fun i -> String.get s i)
+
+  let ba_copy ba = Bigstring.copy ba
+
 end
 
 

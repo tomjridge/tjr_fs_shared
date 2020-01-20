@@ -1,5 +1,7 @@
 (** Some simple implementations of blocks with different underlying types *)
 
+(* FIXME merge into blk_factory *)
+
 open Blk_intf
 
 (* FIXME a block could be a sum type, either string, bytes, or buffer;
@@ -68,8 +70,6 @@ end
 (** use bytes; size is 4096 *)
 let bytes_blk_ops = Bytes_.make ~blk_sz:Blk_sz.blk_sz_4096
 
-
-module Buf_ = struct end (* FIXME *)
 
 
 

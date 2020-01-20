@@ -12,16 +12,19 @@ type arg =
   | A3_bytes_4096_lwt_mem
     (** blk is a bytes_4096; monad is lwt; blk_dev in mem *)
 
+  | A4_ba_4096_lwt_mem
+    (** blk is a bigarray_4096; monad is lwt; blk_dev in mem *)
 
-type r3 = 
-((Blk_id_as_int.blk_id,bytes) Tjr_map.With_pervasives_compare.map_with_pervasives_compare, lwt)
+type 'blk r_3_4 = 
+((Blk_id_as_int.blk_id,'blk) Tjr_map.With_pervasives_compare.map_with_pervasives_compare, lwt)
 with_state
--> (Blk_id_as_int.blk_id, bytes, lwt) blk_dev_ops
+-> (Blk_id_as_int.blk_id, 'blk, lwt) blk_dev_ops
 
 type res = 
   | R1 of (Lwt_unix.file_descr -> (Blk_id_as_int.blk_id,string,lwt)blk_dev_ops)
   | R2 of (Lwt_unix.file_descr -> (Blk_id_as_int.blk_id,bytes,lwt)blk_dev_ops)
-  | R3 of r3
+  | R3 of bytes r_3_4
+  | R4 of Buf.Buf_as_bigarray.ba_buf r_3_4
 
 let make = function
   | A1_string_4096_lwt_fd -> 
@@ -39,3 +42,13 @@ let make = function
         ~with_state)
     in
     R3 f
+  | A4_ba_4096_lwt_mem ->
+    let blk_ops = Common_blk_ops.Bytes_.make ~blk_sz:blk_sz_4096 in
+    let f with_state = (
+      Blk_dev_in_mem.make_blk_dev_in_mem
+        ~monad_ops:lwt_monad_ops
+        ~blk_sz:blk_sz_4096
+        ~with_state)
+    in
+    R4 f
+

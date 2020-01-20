@@ -18,12 +18,17 @@ include Blk_intf
 
 (** {2 Block-related implementations} *)
 
+(* FIXME remove; use blk_factory *)
 module Common_blk_ops = Common_blk_ops
 
+module Blk_factory = Blk_factory 
+
+(* FIXME remove, use blk_dev_factory *)
 module Blk_dev_in_mem = Blk_dev_in_mem
 
 module Blk_dev_on_fd = Blk_dev_on_fd
 
+(* FIXME remove *)
 module Common_blk_layers = Common_blk_layers
 
 module Common_blk_stores = Common_blk_stores
