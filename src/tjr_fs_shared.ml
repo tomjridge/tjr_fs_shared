@@ -89,15 +89,6 @@ include Write_back_cache
 module Wbc_2 = Wbc_2
 
 
-(** {2 Free list} *)
-
-module Free_list = Free_list
-type abstract_free_list = Free_list.abstract_free_list
-
-(** NOTE don't expose free_list_ops record type since alloc and free are overloaded *)
-
-let free_list_ops : (int,abstract_free_list)Free_list.free_list_ops = Free_list.free_list_ops
-module Free_list_with_bin_prot = Free_list.Free_list_with_bin_prot
 
 
 (** {2 File operations} *)
