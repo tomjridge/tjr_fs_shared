@@ -26,11 +26,23 @@ type arg =
   | A5_blk_ba__lwt_fd
     (** blk is a ba_4096; monad is lwt; blk_dev on fd *)
 
+  | A6_blk_ba__lwt of a6
+
+
+and a6 = Filename of string | Fd of Lwt_unix.file_descr 
+  
+
 
 type 'blk r_3_4 = 
 ((blk_id,'blk) Tjr_map.With_pervasives_compare.map_with_pervasives_compare, lwt)
 with_state
 -> (blk_id, 'blk, lwt) blk_dev_ops
+
+(* We get back a blk_dev and a function for closing the blk dev, by closing the underlying fd *)
+module type R6 = sig
+  val close_blk_dev : unit -> (unit, lwt) m
+  val blk_dev : (blk_id, ba_buf, lwt) blk_dev_ops
+end
 
 type res = 
   | R1 of (Lwt_unix.file_descr -> (blk_id,string,lwt)blk_dev_ops)
@@ -38,6 +50,27 @@ type res =
   | R3 of bytes r_3_4
   | R4 of ba_buf r_3_4
   | R5 of (Lwt_unix.file_descr -> (blk_id,ba_buf,lwt)blk_dev_ops)
+  | R6 of ((module R6),lwt)m
+
+
+module L = Tjr_monad.With_lwt
+
+let rec make_6 (x:a6) = L.(
+    x |> function
+    | Filename filename -> (
+        L.from_lwt (Lwt_unix.(openfile filename [O_CREAT;O_RDWR] Tjr_file.default_create_perm)) 
+        >>= fun fd ->
+        make_6 (Fd fd))
+    | Fd fd -> 
+      let blk_ops = Blk_factory.(make A3_ba_4096 |> fun (R3 x) -> x)[@@warning "-8"] in
+      let module A = struct
+        let close_blk_dev () = L.from_lwt(Lwt_unix.close fd) 
+        let blk_dev = Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
+      end
+      in
+      return (module A : R6))
+
+let _ = make_6
 
 let make = function
   | A1_string_4096_lwt_fd -> 
@@ -65,6 +98,6 @@ let make = function
     in
     R4 f
   | A5_blk_ba__lwt_fd ->
-    let blk_ops = Blk_factory.(make A3_ba_4096 |> fun (R3 x) -> x) in
+    let blk_ops = Blk_factory.(make A3_ba_4096 |> fun (R3 x) -> x)[@@warning "-8"] in
     R5 (fun fd -> Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd)
-[@@warning "-8"]
+  | A6_blk_ba__lwt x -> R6 (make_6 x)
