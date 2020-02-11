@@ -8,8 +8,7 @@ include Shared_intf
 
 (** {2 Buffers} *)
 
-module Buf = Buf
-include Buf
+module Buf_factory = Buf_factory
 
 (** {2 Block-related types } *)
 
@@ -19,7 +18,7 @@ include Blk_intf
 (** {2 Block-related implementations} *)
 
 (* FIXME remove; use blk_factory *)
-module Common_blk_ops = Common_blk_ops
+(* module Common_blk_ops = Common_blk_ops *)
 
 module Blk_factory = Blk_factory 
 
@@ -29,18 +28,18 @@ module Blk_dev_in_mem = Blk_dev_in_mem
 module Blk_dev_on_fd = Blk_dev_on_fd
 
 (* FIXME remove *)
-module Common_blk_layers = Common_blk_layers
+(* module Common_blk_layers = Common_blk_layers *)
 
-module Common_blk_stores = Common_blk_stores
+(* module Common_blk_stores = Common_blk_stores *)
 
 module Blk_dev_factory = Blk_dev_factory
 
 (** {2 Functional-store-passing monad} *)
 
 (* type fstore = Fstore_passing.fstore *)
-type fstore_passing = Fstore_passing.fstore_passing
-let fstore_passing_monad_ops = Fstore_passing.monad_ops
-module Fstore_passing = Fstore_passing
+(* type fstore_passing = Fstore_passing.fstore_passing *)
+(* let fstore_passing_monad_ops = Fstore_passing.monad_ops *)
+(* module Fstore_passing = Fstore_passing *)
 
 
 (** {2 Kv ops} *)
@@ -96,10 +95,6 @@ module Wbc_2 = Wbc_2
 module File_ops = File_ops
 include File_ops
 
-(** {2 Dependency management} *)
-
-(* module Depman = Depman *)
-module Depman2 = Depman2
 
 
 (** {2 Testing, controlled by optional config file "shared_config.json"} *)

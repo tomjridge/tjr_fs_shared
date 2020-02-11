@@ -1,9 +1,11 @@
 
+(* FIXME combine the following two types; maybe keep insert_many only *)
+
 (** Simple map operations: find, insert and delete (no insert_many). *)
 module Fid_map_ops = struct
 
   type ('k,'v,'t) fid_map_ops = {
-    find : 'k -> ('v option, 't) m;
+    find   : 'k -> ('v option, 't) m;
     insert : 'k -> 'v -> (unit, 't) m;
     delete : 'k -> (unit, 't) m;
   }
@@ -32,17 +34,17 @@ module Map_ops_type = struct
 
   *)
   type ('k,'v,'t) map_ops = {
-    find: 'k -> ('v option,'t) m;
-    insert: 'k -> 'v -> (unit,'t) m;
-    delete: 'k -> (unit,'t)m;
-    insert_many: 'k -> 'v -> ('k*'v) list -> (('k*'v)list,'t) m
+    find        : 'k -> ('v option,'t) m;
+    insert      : 'k -> 'v -> (unit,'t) m;
+    delete      : 'k -> (unit,'t)m;
+    insert_many : 'k -> 'v -> ('k*'v) list -> (('k*'v)list,'t) m
   }
 
 end
 
 include Map_ops_type
 
-
+(* FIXME put in Insert_many module? *)
 module Internal_make_insert_many_insert_all = struct
 
   (** Utility: call [insert_many] in a loop. *)

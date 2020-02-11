@@ -7,6 +7,8 @@
 
 *)
 
+(* FIXME this could be made a lot neater; also merge with other versions *)
+
 open Blk_intf
 
 (* NOTE the blk_id is a plain int *)

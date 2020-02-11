@@ -43,6 +43,7 @@ module type R6 = sig
   val close_blk_dev : unit -> (unit, lwt) m
   val blk_dev : (blk_id, ba_buf, lwt) blk_dev_ops
 end
+(* FIXME make the other args return a similar result *)
 
 type res = 
   | R1 of (Lwt_unix.file_descr -> (blk_id,string,lwt)blk_dev_ops)
@@ -74,13 +75,13 @@ let _ = make_6
 
 let make = function
   | A1_string_4096_lwt_fd -> 
-    let blk_ops = Common_blk_ops.String_.make ~blk_sz:blk_sz_4096 in
+    let blk_ops = Blk_factory.make_1 () in
     R1 (fun fd -> Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd)
   | A2_bytes_4096_lwt_fd -> 
-    let blk_ops = Common_blk_ops.Bytes_.make ~blk_sz:blk_sz_4096 in
+    let blk_ops = Blk_factory.make_2 () in
     R2 (fun fd -> Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd)
   | A3_bytes_4096_lwt_mem -> 
-    let blk_ops = Common_blk_ops.Bytes_.make ~blk_sz:blk_sz_4096 in
+    let blk_ops = Blk_factory.make_2 () in
     let f with_state = (
       Blk_dev_in_mem.make_blk_dev_in_mem
         ~monad_ops:lwt_monad_ops
