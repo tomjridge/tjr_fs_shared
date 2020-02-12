@@ -17,6 +17,7 @@
    tjr_lib
    tjr_monad
    tjr_profile
+   ppx_jane ; optcomp
    lwt ; for lwt block device
    lru ; for caching
    ke ; for functional queues
@@ -24,10 +25,11 @@
 ))
 
 
-(package 
- (name tjr_fs_shared_examples)
- (synopsis "Shared definitions for filesystem work (examples lib)")
- (depends tjr_fs_shared))
+; this is currently empty
+;(package 
+; (name tjr_fs_shared_examples)
+; (synopsis "Shared definitions for filesystem work (examples lib)")
+; (depends tjr_fs_shared))
 
 ; (package 
 ;  (name tjr_fs_shared_test)

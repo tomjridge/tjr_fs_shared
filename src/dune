@@ -2,6 +2,7 @@
   (name tjr_fs_shared)
   (public_name tjr_fs_shared)
 
+  (preprocessor_deps (file "config.ml"))
   (preprocess (pps ppx_deriving_yojson ppx_jane))
 
   ; -27 is unused var, -39 is unused rec flag

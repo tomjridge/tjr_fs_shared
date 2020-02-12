@@ -11,6 +11,7 @@ depends: [
   "tjr_lib"
   "tjr_monad"
   "tjr_profile"
+  "ppx_jane"
   "lwt"
   "lru"
   "ke"

@@ -88,17 +88,12 @@ type str_256 = Str_256.str_256
 
 module Map_with_key_traversal = Map_with_key_traversal
 
-(** {2 Simple sequence type} *)
-
-(* module Tjr_seq = Tjr_seq *)
-
 
 (** {2 Write back cache} *)
 
 module Write_back_cache = Write_back_cache
-(* include Write_back_cache *)
 
-module Wbc_2 = Wbc_2
+module Write_back_cache_v2 = Write_back_cache_v2
 
 
 
@@ -111,7 +106,18 @@ let lwt_file_ops = File_ops.lwt_file_ops
 
 
 
-(** {2 Testing, controlled by optional config file "shared_config.json"} *)
+(** {2 Testing} *)
+
+(** NOTE controlled by optcomp compile-time config.ml *)
+
+module Test = Test
+
+(** {2 Log} *)
+
+module Log = Log
+
+
+(*
 
 module Internal = struct
   module C = struct
@@ -130,3 +136,4 @@ let testing_enabled = Internal.config.testing_enabled
 let test = (if testing_enabled then (fun f -> f ()) [@inline] else fun f -> ()) 
 let assert_ = (if testing_enabled then (fun f -> assert(f())) [@inline] else fun f -> ())
 
+*)

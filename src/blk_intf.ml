@@ -8,8 +8,6 @@ The main choices:
 *)
 
 
-(** {2 Blk_sz} *)
-
 (** *)
 module Blk_sz : sig 
   type blk_sz[@@deriving bin_io]
@@ -32,7 +30,8 @@ let blk_sz_4096 = Blk_sz.blk_sz_4096
 
 (** This is a common instance of blk_id; we don't open it by default
    because we want most code to be independent of the exact repn. of
-   blk_id NOTE do not open this module *)
+   blk_id NOTE do not open this module FIXME replace with [{ blk_id:'a}]
+   and [{ blk_id:int}] record *)
 module Blk_id_as_int : sig 
   type blk_id[@@deriving bin_io, yojson]
   val of_int: int -> blk_id
@@ -80,6 +79,23 @@ end
 include Blk_dev_ops
 
 
+module Blk_allocator_ops = struct
+  (** A type for managing the free space on the disk. *)
+
+  (** NOTE we assume alloc never fails, or that error is handled
+      elsewhere in the monad; fields were named alloc and free *)
+  type ('blk_id,'t) blk_allocator_ops = {
+    blk_alloc : unit -> ('blk_id,'t) m; 
+    blk_free  : 'blk_id -> (unit,'t) m;
+  }
+end
+include Blk_allocator_ops
+
+
+
+
+
+
 (*
 (* This is used for talks, to avoid explaining labelled args *)
 module Internal_unlabelled_blk_dev_ops = struct
@@ -91,6 +107,7 @@ module Internal_unlabelled_blk_dev_ops = struct
 end
 *)
 
+(*
 (* FIXME remove *)
 (** A blk layer has blk_ops and blk_dev_ops FIXME remove this? *)
 module Blk_layer = struct
@@ -104,20 +121,10 @@ end
 
 (** NOTE to access the field names, open Blk_layer *)
 type ('blk,'dev) blk_layer = ('blk,'dev) Blk_layer.blk_layer
+*)
 
 
-module Blk_allocator_ops = struct
-  (** A type for managing the free space on the disk. *)
-
-  (** NOTE we assume alloc never fails, or that error is handled
-      elsewhere in the monad; fields were named alloc and free *)
-  type ('blk_id,'t) blk_allocator_ops = {
-    blk_alloc : unit -> ('blk_id,'t) m; 
-    blk_free  : 'blk_id -> (unit,'t) m;
-  }
-end
-include Blk_allocator_ops
-
+(*
 
 (* FIXME sync, close? remove this; favour blkdev with flags to indicate which functionality is available *)
 (** A block store is like a block layer, but also includes an allocator *)
@@ -132,3 +139,4 @@ end
 (** NOTE to access field names, open Blk_store *)
 type ('blk_id,'blk,'sync,'close,'t) blk_store = ('blk_id,'blk,'sync,'close,'t) Blk_store.blk_store 
 
+*)

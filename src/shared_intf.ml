@@ -23,17 +23,14 @@ type 'buf buf_ops = {
 
 (** {2 Marshalling and unmarshalling.}  *)
 
-module Off_ = struct
-  type off = int
-end
-open Off_
-
 type ('a,'buf) mshl = {
-  marshal   : 'a -> 'buf*off -> 'buf*off;
-  unmarshal : 'buf -> off -> 'a * off;
+  marshal   : 'a -> 'buf*int -> 'buf*int;
+  unmarshal : 'buf -> int -> 'a * int;
   max_sz    : int; 
 }
-(** max_sz: maximum size of a marshalled elt *)
+(** 
+- the int argument is an offset
+- max_sz: maximum size of a marshalled elt *)
 
 
 
