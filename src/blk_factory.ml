@@ -1,4 +1,5 @@
-open Shared_intf
+(* open Shared_intf *)
+open Buf_ops
 open Blk_intf
 
 module Internal = struct

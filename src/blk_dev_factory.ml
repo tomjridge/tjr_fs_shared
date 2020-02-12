@@ -1,8 +1,9 @@
 open Blk_intf
-open Shared_intf
+open Buf_ops
+
+(** Common blk devs *)
 
 (** Internal: blk_id is Blk_id_as_int *)
-
 module Internal = struct
   type blk_id = Blk_id_as_int.blk_id
 end

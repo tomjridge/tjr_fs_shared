@@ -2,18 +2,20 @@
 
 A collection of the main types provided by this library. *)
 
-(** {2 Intf types that don't belong anywhere else} *)
 
-include Shared_intf
+(** {2 A record for the pair of an initial state and related operations} *)
+
+type ('a,'b) initial_state_and_ops = {initial_state:'a; ops:'b}
+
 
 (** {2 Buffers} *)
 
+include Buf_ops
+
 module Buf_factory = Buf_factory
 open Buf_factory
-
-type ba_buf_ops = Buf_as_bigarray.ba_buf_ops
-
-type by_buf_ops = Buf_as_bytes.by_buf_ops
+module Buf_as_bigarray = Buf_as_bigarray
+module Buf_as_bytes = Buf_as_bytes
 
 let ba_buf_ops = Buf_as_bigarray.ba_buf_ops
 
@@ -104,6 +106,10 @@ module File_ops = File_ops
 
 let lwt_file_ops = File_ops.lwt_file_ops
 
+
+(** {2 Marshalling} *)
+
+module Marshal_factory = Marshal_factory
 
 
 (** {2 Testing} *)

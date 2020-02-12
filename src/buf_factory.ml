@@ -1,6 +1,6 @@
-(** Type of buffer operations *)
+(** Common buffer operations *)
 
-open Shared_intf
+open Buf_ops
 
 module Buf_as_bigarray = struct
 
