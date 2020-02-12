@@ -9,6 +9,17 @@ include Shared_intf
 (** {2 Buffers} *)
 
 module Buf_factory = Buf_factory
+open Buf_factory
+
+type ba_buf_ops = Buf_as_bigarray.ba_buf_ops
+
+type by_buf_ops = Buf_as_bytes.by_buf_ops
+
+let ba_buf_ops = Buf_as_bigarray.ba_buf_ops
+
+let by_buf_ops = Buf_as_bytes.by_buf_ops
+
+
 
 (** {2 Block-related types } *)
 
@@ -22,10 +33,12 @@ include Blk_intf
 
 module Blk_factory = Blk_factory 
 
+(*
 (* FIXME remove, use blk_dev_factory *)
 module Blk_dev_in_mem = Blk_dev_in_mem
 
 module Blk_dev_on_fd = Blk_dev_on_fd
+*)
 
 (* FIXME remove *)
 (* module Common_blk_layers = Common_blk_layers *)
@@ -34,16 +47,12 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 
 module Blk_dev_factory = Blk_dev_factory
 
-(** {2 Functional-store-passing monad} *)
-
-(* type fstore = Fstore_passing.fstore *)
-(* type fstore_passing = Fstore_passing.fstore_passing *)
-(* let fstore_passing_monad_ops = Fstore_passing.monad_ops *)
-(* module Fstore_passing = Fstore_passing *)
-
 
 (** {2 Kv ops} *)
 
+module Kv_op = Kv_op
+
+(*
 (* NOTE we don't want to pollute the namespace with all the @@deriving
    functions so we dont include Kv_op_type directly *)
 type ('k,'v) kvop = ('k,'v) Kv_op_type.kvop = 
@@ -53,7 +62,7 @@ type ('k,'v) kvop = ('k,'v) Kv_op_type.kvop =
 
 type ('k,'v) kvop_map = ('k,'v) Kv_op_type.kvop_map
 module Kv_op = Kv_op
-
+*)
 
 (** {2 (Shared) Map ops } *)
 
@@ -67,8 +76,12 @@ module Shared_map_ops = Shared_map_ops
 
 (** {2 Small strings, leq 256 bytes} *)
 
-type ss = Small_string.ss
-module Small_string = Small_string
+(* FIXME remove this *)
+(* type ss = Small_string.ss *)
+(* module Small_string = Small_string *)
+
+module Str_256 = Str_256
+type str_256 = Str_256.str_256
 
 
 (** {2 Maps with key traversal: get_next_binding, get_prev_binding} *)
@@ -77,13 +90,13 @@ module Map_with_key_traversal = Map_with_key_traversal
 
 (** {2 Simple sequence type} *)
 
-module Tjr_seq = Tjr_seq
+(* module Tjr_seq = Tjr_seq *)
 
 
 (** {2 Write back cache} *)
 
 module Write_back_cache = Write_back_cache
-include Write_back_cache
+(* include Write_back_cache *)
 
 module Wbc_2 = Wbc_2
 
@@ -93,7 +106,8 @@ module Wbc_2 = Wbc_2
 (** {2 File operations} *)
 
 module File_ops = File_ops
-include File_ops
+
+let lwt_file_ops = File_ops.lwt_file_ops
 
 
 

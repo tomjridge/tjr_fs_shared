@@ -1,15 +1,3 @@
-*.cmi
-*.cmo
-*.cma
-*.cmx
-*.cmxa
-*.o
-*.a
-/META
-/src/META
 _build/
-/src/.merlin
-/tjr_fs_shared.install
-/dune-project
 .merlin
 /blk_store.exe

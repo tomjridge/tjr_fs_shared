@@ -53,17 +53,3 @@ module Buf_as_bytes = struct
 
 end
 
-type arg =
-  | A1_bigarray
-  | A2_bytes
-
-type res =
-  | R1 of ba_buf buf_ops
-  | R2 of bytes buf_ops
-
-let make_1 () = Buf_as_bigarray.ba_buf_ops
-let make_2 () = Buf_as_bytes.by_buf_ops
-
-let make = function
-  | A1_bigarray -> R1 (make_1())
-  | A2_bytes -> R2 (make_2())

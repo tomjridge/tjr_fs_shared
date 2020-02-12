@@ -3,11 +3,14 @@
 The main choices:
 
 - blk implementation (string, bytes, buf/bigarray etc)
-- blk_id (presumably int)
+- blk_id (presumably int, but perhaps a pair of (dev,int) )
 - blk_dev (in mem, on file, on dev etc)
 *)
 
 
+(** {2 Blk_sz} *)
+
+(** *)
 module Blk_sz : sig 
   type blk_sz[@@deriving bin_io]
   val of_int: int -> blk_sz
@@ -77,6 +80,7 @@ end
 include Blk_dev_ops
 
 
+(*
 (* This is used for talks, to avoid explaining labelled args *)
 module Internal_unlabelled_blk_dev_ops = struct
   type ('blk_id,'blk,'t) blk_dev_ops = {
@@ -85,8 +89,9 @@ module Internal_unlabelled_blk_dev_ops = struct
     read: 'blk_id -> ('blk,'t) m;
   }
 end
+*)
 
-
+(* FIXME remove *)
 (** A blk layer has blk_ops and blk_dev_ops FIXME remove this? *)
 module Blk_layer = struct
   (** Keep 'dev abstract since we may need to stage the
@@ -114,6 +119,7 @@ end
 include Blk_allocator_ops
 
 
+(* FIXME sync, close? remove this; favour blkdev with flags to indicate which functionality is available *)
 (** A block store is like a block layer, but also includes an allocator *)
 module Blk_store = struct
   type ('blk_id,'blk,'sync,'close,'t) blk_store = {
