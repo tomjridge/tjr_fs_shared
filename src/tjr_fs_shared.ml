@@ -111,6 +111,12 @@ let lwt_file_ops = File_ops.lwt_file_ops
 
 module Marshal_factory = Marshal_factory
 
+type ('a,'buf) mshlr = ('a,'buf)Marshal_factory.mshlr = {
+  max_elt_sz: int;
+  mshl : 'a -> ('buf * int) -> 'buf * int;
+  umshl: 'buf -> int -> 'a * int 
+}
+
 
 (** {2 Testing} *)
 

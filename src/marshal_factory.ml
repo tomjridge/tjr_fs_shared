@@ -1,5 +1,6 @@
 (** Common marshallers *)
 open Buf_ops
+open Blk_intf
 (* open Shared_intf *)
 
 (** Generic marshaller type, assuming max_elt_sz is known (alternative
@@ -32,9 +33,12 @@ end
 
 type arg = 
   | A1_int_option__ba_buf
+  | A2_blk_id_opt__ba_buf
 
 type res =
   | R1 of (int option,ba_buf) mshlr
+  | R2 of (Blk_id_as_int.blk_id option,ba_buf) mshlr
+
 
 let make_1 = 
   let module Int_option = struct
@@ -46,6 +50,23 @@ let make_1 =
   let module X = Make_marshaller(Int_option) in
   X.mshlr
   
+
+let make_2 = 
+  let int_opt_mshlr = make_1 in
+  let max_blk_id_sz = int_opt_mshlr.max_elt_sz in
+      
+  let m_blk_id blk_id = 
+    blk_id |> (function None -> None | Some x -> Some (Blk_id_as_int.to_int x))
+    |> int_opt_mshlr.mshl
+  in
+  let u_blk_id buf off = 
+    int_opt_mshlr.umshl buf off |> fun (x,off) -> 
+    x |> (function None -> None | Some x -> Some(Blk_id_as_int.of_int x)) |> fun x -> 
+    (x,off)
+  in
+  let blk_id_mshlr = { max_elt_sz=max_blk_id_sz; mshl=m_blk_id; umshl=u_blk_id } in
+  blk_id_mshlr
+
 
 (*
 let make = function
