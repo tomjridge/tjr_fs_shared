@@ -1,4 +1,4 @@
-(** Support for basic testing *)
+(** Support for basic testing, controlled by optcomp *)
 
 [%%import "config.ml"]
 
@@ -10,7 +10,7 @@ let assert_ (f:unit->unit) = f ()
 
 [%%else]
 
-let assert_ f = ()
+let assert_ (f:unit->unit) = ()
 
 [%%endif]
 

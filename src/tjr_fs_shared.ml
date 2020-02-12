@@ -108,8 +108,6 @@ let lwt_file_ops = File_ops.lwt_file_ops
 
 (** {2 Testing} *)
 
-(** NOTE controlled by optcomp compile-time config.ml *)
-
 module Test = Test
 
 (** {2 Log} *)
