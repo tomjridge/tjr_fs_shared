@@ -8,6 +8,12 @@ A collection of the main types provided by this library. *)
 type ('a,'b) initial_state_and_ops = {initial_state:'a; ops:'b}
 
 
+(** {2 Int-like types} *)
+
+module Int_like = Int_like
+(* don't include, since we are in the process of moving to these types *)
+
+
 (** {2 Buffers} *)
 
 include Buf_ops
@@ -21,6 +27,7 @@ let ba_buf_ops = Buf_as_bigarray.ba_buf_ops
 
 let by_buf_ops = Buf_as_bytes.by_buf_ops
 
+module Buffers_from_btree = Buffers_from_btree (* FIXME combine with previous *)
 
 
 (** {2 Block-related types } *)
@@ -95,7 +102,7 @@ module Map_with_key_traversal = Map_with_key_traversal
 
 module Write_back_cache = Write_back_cache
 
-module Write_back_cache_v2 = Write_back_cache_v2
+module Write_back_cache_v2_DONT_USE = Write_back_cache_v2
 
 
 
@@ -115,6 +122,11 @@ type ('a,'buf) mshlr = ('a,'buf)Marshal_factory.mshlr = {
   max_elt_sz: int;
   mshl : 'a -> ('buf * int) -> 'buf * int;
   umshl: 'buf -> int -> 'a * int 
+}
+
+type ('k,'v,'buf) kv_mshlr = ('k,'v,'buf)Marshal_factory.kv_mshlr = {
+  k_mshlr: ('k,'buf) mshlr;
+  v_mshlr: ('v,'buf) mshlr;
 }
 
 

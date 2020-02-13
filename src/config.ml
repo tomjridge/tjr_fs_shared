@@ -3,3 +3,6 @@
 
 (* enable Test.check *)
 [%%define TEST_CHECK__ENABLED true] 
+
+
+[%%define PROFILE_BLK_DEV true]

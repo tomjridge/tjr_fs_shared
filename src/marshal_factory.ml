@@ -1,6 +1,7 @@
 (** Common marshallers *)
 open Buf_ops
 open Blk_intf
+open Str_256
 (* open Shared_intf *)
 
 (** Generic marshaller type, assuming max_elt_sz is known (alternative
@@ -10,6 +11,13 @@ type ('a,'buf) mshlr = {
   mshl : 'a -> ('buf * int) -> 'buf * int;
   umshl: 'buf -> int -> 'a * int 
 }
+
+(** A pair of marshallers, one for keys, one for values *)
+type ('k,'v,'buf) kv_mshlr = {
+  k_mshlr: ('k,'buf) mshlr;
+  v_mshlr: ('v,'buf) mshlr;
+}
+
 
 (** Functor to construct a marshaller from a type deriving bin_io *)
 module Make_marshaller(X: sig 
@@ -34,22 +42,31 @@ end
 type arg = 
   | A1_int_option__ba_buf
   | A2_blk_id_opt__ba_buf
+  | A3_int__ba_buf
+  | A4_str_256__ba_buf
+  | A5_int_int_kv_mshlr
+  | A6_s256_int_kv_mshlr
+  | A7_s256_s256_kv_mshlr
 
 type res =
   | R1 of (int option,ba_buf) mshlr
   | R2 of (Blk_id_as_int.blk_id option,ba_buf) mshlr
+  | R3 of (int,ba_buf) mshlr
+  | R4 of (str_256,ba_buf) mshlr
+  | R5 of (int,int,ba_buf) kv_mshlr
+  | R6 of (str_256,int,ba_buf) kv_mshlr
+  | R7 of (str_256,str_256,ba_buf) kv_mshlr
 
+open Bin_prot.Std
 
 let make_1 = 
   let module Int_option = struct
-    open Bin_prot.Std
     type t = int option [@@deriving bin_io]
     let max_elt_sz=10
   end
   in
   let module X = Make_marshaller(Int_option) in
-  X.mshlr
-  
+  X.mshlr  
 
 let make_2 = 
   let int_opt_mshlr = make_1 in
@@ -66,6 +83,46 @@ let make_2 =
   in
   let blk_id_mshlr = { max_elt_sz=max_blk_id_sz; mshl=m_blk_id; umshl=u_blk_id } in
   blk_id_mshlr
+
+let make_3 = 
+  let module Y = struct
+    type t = int[@@deriving bin_io]
+    let max_elt_sz = 9
+  end
+  in
+  let module X = Make_marshaller(Y) in
+  X.mshlr
+
+let int_mshlr = make_3
+
+let make_4 = 
+  let module Y = struct
+    type t = Str_256.str_256[@@deriving bin_io]
+    let bin_prot_header_sz = 3 (* FIXME NOTE that str_128 would only require 1 byte *)
+    let max_elt_sz = 256 + bin_prot_header_sz
+  end
+  in
+  let module X = Make_marshaller(Y) in
+  X.mshlr
+
+let str_256_mshlr = make_4
+
+let make_5 = {
+  k_mshlr=int_mshlr;
+  v_mshlr=int_mshlr
+}
+
+let make_6 = {
+  k_mshlr=str_256_mshlr;
+  v_mshlr=int_mshlr;
+}
+
+let make_7 = {
+  k_mshlr=str_256_mshlr;
+  v_mshlr=str_256_mshlr;
+}
+
+  
 
 
 (*

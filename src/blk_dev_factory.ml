@@ -1,3 +1,5 @@
+[%%import "config.ml"]
+
 open Blk_intf
 open Buf_ops
 
@@ -39,7 +41,8 @@ type 'blk r_3_4 =
 with_state
 -> (blk_id, 'blk, lwt) blk_dev_ops
 
-(* We get back a blk_dev and a function for closing the blk dev, by closing the underlying fd *)
+(* We get back a blk_dev and a function for closing the blk dev, by
+   closing the underlying fd *)
 module type R6 = sig
   val close_blk_dev : unit -> (unit, lwt) m
   val blk_dev : (blk_id, ba_buf, lwt) blk_dev_ops
@@ -57,6 +60,41 @@ type res =
 
 module L = Tjr_monad.With_lwt
 
+[%%if PROFILE_BLK_DEV]
+let profile_blk_dev = true
+[%%else]
+let profile_blk_dev = false
+[%%endif]
+
+let 
+  [r1; r2; w1; w2 ] =
+  ["r1" ; "r2" ; "w1" ; "w2" ]
+  |> List.map Tjr_profile.intern[@@warning "-8"]
+
+let add_profiling blk_dev_ops = 
+  let open Tjr_monad.With_lwt in
+  let prf = Tjr_profile.make_profiler 
+      ~print_header:"blk profiler" 
+      ~print_at_exit:true () 
+  in
+  let { blk_sz; read; write; write_many } = blk_dev_ops in
+  let read ~blk_id = 
+    prf.mark r1;
+    read ~blk_id >>= fun b ->
+    prf.mark r2;
+    return b
+  in
+  let write ~blk_id ~blk = 
+    prf.mark w1;
+    write ~blk_id ~blk >>= fun () ->
+    prf.mark w2;
+    return ()
+  in
+  { blk_dev_ops with read;write }
+    
+
+
+
 let rec make_6 (x:a6) = L.(
     x |> function
     | Filename filename -> (
@@ -68,6 +106,9 @@ let rec make_6 (x:a6) = L.(
       let module A = struct
         let close_blk_dev () = L.from_lwt(Lwt_unix.close fd) 
         let blk_dev = Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
+        let blk_dev = profile_blk_dev |> function
+          | true -> add_profiling blk_dev
+          | false -> blk_dev
       end
       in
       return (module A : R6))
@@ -103,3 +144,5 @@ let make = function
     let blk_ops = Blk_factory.(make A3_ba_4096 |> fun (R3 x) -> x)[@@warning "-8"] in
     R5 (fun fd -> Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd)
   | A6_blk_ba__lwt x -> R6 (make_6 x)
+
+
