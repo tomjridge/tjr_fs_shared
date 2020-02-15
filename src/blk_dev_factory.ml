@@ -67,8 +67,8 @@ let profile_blk_dev = false
 [%%endif]
 
 let 
-  [r1; r2; w1; w2 ] =
-  ["r1" ; "r2" ; "w1" ; "w2" ]
+  [r1; w1; w2 ] =
+  ["r1" ; "w1"; "w2" ]
   |> List.map Tjr_profile.intern[@@warning "-8"]
 
 let add_profiling blk_dev_ops = 
@@ -81,16 +81,22 @@ let add_profiling blk_dev_ops =
   let read ~blk_id = 
     prf.mark r1;
     read ~blk_id >>= fun b ->
-    prf.mark r2;
+    prf.mark (-1*r1);
     return b
   in
   let write ~blk_id ~blk = 
     prf.mark w1;
     write ~blk_id ~blk >>= fun () ->
-    prf.mark w2;
+    prf.mark (-1*w1);
     return ()
   in
-  { blk_dev_ops with read;write }
+  let write_many ws = 
+    prf.mark w2;
+    write_many ws >>= fun () ->
+    prf.mark (-1*w2);
+    return ()
+  in
+  { blk_sz; read;write;write_many }
     
 
 
