@@ -44,6 +44,7 @@ with_state
 (* We get back a blk_dev and a function for closing the blk dev, by
    closing the underlying fd *)
 module type R6 = sig
+  val fd : Lwt_unix.file_descr
   val close_blk_dev : unit -> (unit, lwt) m
   val blk_dev : (blk_id, ba_buf, lwt) blk_dev_ops
 end
@@ -110,6 +111,7 @@ let rec make_6 (x:a6) = L.(
     | Fd fd -> 
       let blk_ops = Blk_factory.(make A3_ba_4096 |> fun (R3 x) -> x)[@@warning "-8"] in
       let module A = struct
+        let fd = fd 
         let close_blk_dev () = L.from_lwt(Lwt_unix.close fd) 
         let blk_dev = Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
         let blk_dev = profile_blk_dev |> function
