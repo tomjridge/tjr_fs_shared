@@ -5,7 +5,7 @@ A collection of the main types provided by this library. *)
 
 (** {2 A record for the pair of an initial state and related operations} *)
 
-type ('a,'b) initial_state_and_ops = {initial_state:'a; ops:'b}
+type ('a,'b) initial_state_and_ops = ('a,'b) Internal_intf.initial_state_and_ops = {initial_state:'a; ops:'b}
 
 
 (** {2 Int-like types} *)

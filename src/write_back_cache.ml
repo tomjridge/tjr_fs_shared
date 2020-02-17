@@ -8,7 +8,7 @@ At the moment, we use the pqwy functional implementation, but this is
 
 (* FIXME FIXME use tjr_lib_core.tjr_lru *)
 
-open Shared_intf
+open Internal_intf
 
 (** 
 NOTE since we store a dirty flag (bool) with each value, some of the operations take/return a 'v*bool rather than a v
@@ -20,10 +20,10 @@ The operations:
 - insert
 - delete
 - find
-- trim_1, which returns the trimmed value and an indication of whether it was dirty
+- trim_1, which returns the trimmed value and an indication of whether it was dirty (essentially Lru.pop)
 - trim delta - try to pop delta lru-elts; the delta arg is optional
   (it uses the value provided on create by default); the returned list
-  only contains the dirty entries (so we don't handle clean entries)
+  only contains the dirty entries (so we don't handle clean entries, and we have at most delta elts but usually less)
 - trim_all - trim all elts; return filtered and an empty wbc
 - promote: to touch a key so that it has just been used (find does not
   automatically promote... perhaps it should?)
@@ -101,7 +101,10 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
       | true -> Some(trim ~filter_map t)
     in
     let trim_all ?(filter_map=filter_map) t =
-      trim ~filter_map ~delta:cap t
+      trim ~filter_map ~delta:(size t) t |> fun (xs,t) ->
+      assert(size t = 0);
+      (xs,t) 
+      (* FIXME test this *)
     in
     let create = create ~cap in
     { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size }}
