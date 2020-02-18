@@ -46,8 +46,8 @@ type ('k,'v,'a,'t) write_back_cache_ops = {
   trim_all         : ?filter_map:('k * ('v * bool) -> 'a option) -> 't -> ('a list * 't); 
   size             : 't -> int;
   bindings         : 't -> ('k * ('v * bool)) list;
-  dirties          : 't -> ('k * 'v) list;
-  clean_dirties    : 't -> ('a list * 't); 
+  (* dirties          : 't -> ('k * 'v) list; *)
+  (* clean_dirties    : 't -> ('a list * 't);  *)
 }
 
 module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struct
@@ -112,15 +112,9 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
       (xs,t) 
       (* FIXME test this *)
     in
+(*
     let dirties t = t |> bindings |> List.filter (fun (k,(v,d)) -> d) in
-    let clean_dirties t =
-      (dirties t) |> fun xs -> 
-      let t = (xs,t) |> iter_k (fun ~k (xs,t) -> 
-          match xs with
-          | [] -> t
-          | x::xs -> Internal.Lru.
-
-      
+*)    
     let create = create ~cap in
     { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size; bindings }}
 
