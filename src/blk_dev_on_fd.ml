@@ -153,7 +153,9 @@ end
       let write ~blk_id ~blk = 
         L.write ~blk_ops ~fd ~blk_id:(Blk_id_.to_int blk_id) ~blk 
       in
-      (* FIXME FIXME using Lwt.join is not safe, since each write may interact with each other write *)
+      (* FIXME FIXME use lwt IO vector write for performance, rather
+         than sequentializing; using Lwt.join is not safe, since each
+         write may interact with each other write *)
       let write_many writes = 
         (* Printf.printf "%s\n%!" __LOC__; *)
         writes |> iter_k (fun ~k ws -> 
