@@ -87,10 +87,14 @@ end
 
       open Lwt
 
-      let join xs = (List.map Tjr_monad.With_lwt.to_lwt xs)
+      (* This is not safe when accessing a file descriptor, since
+         accesses need to be serialized (lseek etc) *)
+      (* let join xs = (List.map Tjr_monad.With_lwt.to_lwt xs)
                     |> Lwt.join
-                    |> Tjr_monad.With_lwt.from_lwt
+                    |> Tjr_monad.With_lwt.from_lwt *)
       (* FIXME this mapping of an (essentially) identity function is poor *)
+
+      (* let in_use = ref false *)
 
       let read ~(blk_ops:'blk blk_ops) =
         let blk_sz = blk_ops.blk_sz |> Blk_sz.to_int in
@@ -118,12 +122,15 @@ end
             assert(String.length blk > 0);
             assert(blk_sz > 0);
             assert(blk_id>=0);           
+            (* assert(not !in_use); *)
+            (* in_use:=true; *)
             UU.lseek fd (blk_id * blk_sz) SEEK_SET >>= fun _ -> 
             let buf = blk |> Bytes.of_string in
             (* Printf.printf "%d %d\n%!" (String.length blk) blk_sz; *)
             UU.write fd buf 0 blk_sz >>= fun n -> 
             (* test(fun _ -> assert (n=blk_sz)); *)
             assert (n=blk_sz);
+            (* in_use:=false; *)
             return ()
           end
           |> Tjr_monad.With_lwt.from_lwt
@@ -134,6 +141,8 @@ end
 
   module With_lwt = struct
     module L = Internal.Lwt_
+    module M = Tjr_monad.With_lwt
+    open M
 
     (** Construct a naive [blk_dev_ops] backed by a file. For testing. *)
     let make_blk_dev_on_fd ~(blk_ops:'blk blk_ops) ~fd = 
@@ -144,9 +153,16 @@ end
       let write ~blk_id ~blk = 
         L.write ~blk_ops ~fd ~blk_id:(Blk_id_.to_int blk_id) ~blk 
       in
+      (* FIXME FIXME using Lwt.join is not safe, since each write may interact with each other write *)
       let write_many writes = 
-        writes |> List.map (fun (blk_id,blk) -> write ~blk_id ~blk)
-        |> L.join
+        (* Printf.printf "%s\n%!" __LOC__; *)
+        writes |> iter_k (fun ~k ws -> 
+            match ws with 
+            | [] -> return ()
+            | (blk_id,blk)::ws -> 
+              (* Printf.printf "%d %s\n%!" (List.length ws) __LOC__; *)
+              write ~blk_id ~blk >>= fun () ->
+              k ws)
       in
       { blk_sz; read; write; write_many }
   end

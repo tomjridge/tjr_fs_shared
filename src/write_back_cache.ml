@@ -25,6 +25,7 @@ The operations:
   (it uses the value provided on create by default); the returned list
   only contains the dirty entries (so we don't handle clean entries, and we have at most delta elts but usually less)
 - trim_all - trim all elts; return filtered and an empty wbc
+- clean_dirties: get all the dirty entries, and return them, together with a fully clean cache
 - promote: to touch a key so that it has just been used (find does not
   automatically promote... perhaps it should?)
 
@@ -43,7 +44,10 @@ type ('k,'v,'a,'t) write_back_cache_ops = {
   trim             : ?filter_map:('k * ('v * bool) -> 'a option) -> ?delta:int -> 't -> 'a list * 't;
   trim_if_over_cap : ?filter_map:('k * ('v * bool) -> 'a option) -> 't -> ('a list * 't) option; (* could be 'b *)
   trim_all         : ?filter_map:('k * ('v * bool) -> 'a option) -> 't -> ('a list * 't); 
-  size             : 't -> int
+  size             : 't -> int;
+  bindings         : 't -> ('k * ('v * bool)) list;
+  dirties          : 't -> ('k * 'v) list;
+  clean_dirties    : 't -> ('a list * 't); 
 }
 
 module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struct
@@ -76,6 +80,8 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
     let create ~cap = Lru.empty cap
 
     let promote k t = Lru.promote k t
+
+    let bindings t = Lru.to_list t
   end
   open Internal
 
@@ -106,8 +112,17 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
       (xs,t) 
       (* FIXME test this *)
     in
+    let dirties t = t |> bindings |> List.filter (fun (k,(v,d)) -> d) in
+    let clean_dirties t =
+      (dirties t) |> fun xs -> 
+      let t = (xs,t) |> iter_k (fun ~k (xs,t) -> 
+          match xs with
+          | [] -> t
+          | x::xs -> Internal.Lru.
+
+      
     let create = create ~cap in
-    { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size }}
+    { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size; bindings }}
 
   let _ 
 : cap:int ->
