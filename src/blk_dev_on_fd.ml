@@ -25,7 +25,7 @@ end
     let blk_sz = blk_ops.blk_sz |> Blk_sz.to_int in
     fun ~blk_id -> 
       assert(blk_id>=0);
-      ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET);
+      ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET : int);
       let buf = Bytes.make blk_sz (Char.chr 0) in 
       let n = Unix.read fd buf 0 blk_sz in
       (* assert (n=blk_sz); we allow the file to expand automatically, so
@@ -41,7 +41,7 @@ end
       let blk = blk_ops.to_string blk in
       assert(String.length blk > 0);
       assert(blk_id>=0);
-      ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET);
+      ignore (Unix.lseek fd (blk_id * blk_sz) SEEK_SET : int);
       let buf = blk |> Bytes.of_string in
       (* Printf.printf "%d %d\n%!" (String.length blk) blk_sz; *)
       let n = Unix.single_write fd buf 0 blk_sz in

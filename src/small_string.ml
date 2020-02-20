@@ -22,7 +22,7 @@ end = struct
   let of_string x = 
     assert (String.length x <= max_length);
     x
-  let compare: ss -> ss -> int = Pervasives.compare
+  let compare: ss -> ss -> int = Stdlib.compare
 end
 
 include Internal_ss

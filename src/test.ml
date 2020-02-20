@@ -4,7 +4,7 @@
 
 [%%if TEST_ASSERT__ENABLED]
 
-let _ = assert(Printf.printf "%s: assertions are enabled\n%!" "Tjr_fs_shared.Test";true)
+let _ : unit = assert(Printf.printf "%s: assertions are enabled\n%!" "Tjr_fs_shared.Test";true)
 
 let assert_ (f:unit->unit) = f ()
 
@@ -17,7 +17,7 @@ let assert_ (f:unit->unit) = ()
 
 [%%if TEST_CHECK__ENABLED]
 
-let _ = assert(Printf.printf "%s: checks are enabled\n%!" "Tjr_fs_shared.Test";true)
+let _ : unit = assert(Printf.printf "%s: checks are enabled\n%!" "Tjr_fs_shared.Test";true)
 
 let check (f:unit->unit) = f ()
 

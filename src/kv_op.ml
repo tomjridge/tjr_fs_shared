@@ -41,7 +41,7 @@ type ('k,'v,'map) kvop_map_ops = ('k,('k,'v)kvop,'map) Tjr_map.map_ops
 (* FIXME default kv map, not kvop *)
 let default_kvop_map_ops () : ('k,'v,'map) kvop_map_ops = 
   let open Tjr_map in
-  let map_ops = make_map_ops Pervasives.compare in
+  let map_ops = make_map_ops Stdlib.compare in
   map_ops
 
 let _ = default_kvop_map_ops
