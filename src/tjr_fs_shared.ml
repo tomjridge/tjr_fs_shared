@@ -59,7 +59,8 @@ module Blk_dev_factory = Blk_dev_factory
 
 (** {2 Kv ops} *)
 
-module Kv_op = Kv_op
+module Kvop = Kvop
+include Kvop.Kv_op_type
 
 (*
 (* NOTE we don't want to pollute the namespace with all the @@deriving
