@@ -56,6 +56,7 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 
 module Blk_dev_factory = Blk_dev_factory
 
+module Rt_blk = Rt_blk
 
 (** {2 Kv ops} *)
 
