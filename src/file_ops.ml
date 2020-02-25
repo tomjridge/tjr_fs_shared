@@ -13,7 +13,7 @@ type ('fd,'blk,'t) file_ops = {
   read_file            : fn -> (string,'t)m;
   write_string_to_file : fn:fn -> string -> (unit,'t)m;
   stat                 : fn -> (fds_t option,'t)m;
-  fd_from_file         : fn:fn -> create:bool -> init:bool -> ('fd,'t)m;
+  open_                : fn:fn -> create:bool -> init:bool -> ('fd,'t)m;
   close                : 'fd -> (unit,'t)m;
   blk_sz               : int;
   read_blk             : 'fd -> int -> ('blk,'t)m;
@@ -21,7 +21,7 @@ type ('fd,'blk,'t) file_ops = {
 }
 
 
-module Lwt_file_ops : sig
+module Lwt_file_ops__bytes : sig
   type fd = Lwt_unix.file_descr
   type blk = bytes
   val lwt_file_ops : (fd,blk,lwt) file_ops
@@ -40,7 +40,7 @@ end = struct
 
   let stat fn = Tjr_file.stat fn |> return
 
-  let fd_from_file ~fn ~create ~init = Lwt_unix.(
+  let open_ ~fn ~create ~init = Lwt_unix.(
       let flgs = [O_RDWR] @ (if create then [O_CREAT] else []) in
       from_lwt(openfile fn flgs 0o640) >>= fun fd -> 
       (if init then from_lwt(ftruncate fd 0) else return ()) >>= fun _ -> 
@@ -66,9 +66,36 @@ end = struct
     assert(n=blk_sz);
     return ()    
 
-  let lwt_file_ops = { read_file; write_string_to_file; stat; fd_from_file; close; blk_sz; read_blk; write_blk }
+  let lwt_file_ops = { read_file; write_string_to_file; stat; open_; close; blk_sz; read_blk; write_blk }
 end
 
-let lwt_file_ops = Lwt_file_ops.lwt_file_ops
+open Buf_factory.Buf_as_bigarray
 
-(* let file_ops_to_block_ops *)
+(** This version standardizes on ba_buf, but Lwt prefers bytes... so this is slightly inefficient *)
+module Lwt_file_ops__ba_buf : sig
+  type fd = Lwt_unix.file_descr
+  type blk = ba_buf
+  val lwt_file_ops : (fd,blk,lwt) file_ops
+end = struct 
+  open Tjr_monad.With_lwt
+
+  include Lwt_file_ops__bytes
+
+  let { read_file; write_string_to_file; stat; open_; close; blk_sz; read_blk; write_blk }  = lwt_file_ops
+
+  type blk = ba_buf
+
+  (* let buf_ops = Buf_factory.Buf_as_bigarray.ba_buf_ops *)
+      
+  let read_blk fd blk_index = 
+    read_blk fd blk_index >>= fun blk ->
+    return (Bigstring.of_bytes blk)
+
+  let write_blk fd blk_index buf = 
+    write_blk fd blk_index (Bigstring.to_bytes buf)
+
+  let lwt_file_ops = { read_file; write_string_to_file; stat; open_; close; blk_sz; read_blk; write_blk }
+end
+
+(** default to using bigarray *)
+let lwt_file_ops = Lwt_file_ops__ba_buf.lwt_file_ops
