@@ -9,13 +9,13 @@ let make_blk_dev_in_mem ~monad_ops ~blk_sz ~with_state =
   let with_state = with_state.with_state in
   let write ~(blk_id:'blk_id) ~(blk:'blk) =
     with_state (fun ~state:s ~set_state ->
-        set_state (Tjr_map.With_pervasives_compare.add blk_id blk s) >>= fun _ -> 
+        set_state (Tjr_map.With_stdcmp.add blk_id blk s) >>= fun _ -> 
         return ())
   in
   let read ~blk_id =
     (* NOTE assume never try to access an uninitialized blk *)
     with_state (fun ~state:s ~set_state ->
-        return (Tjr_map.With_pervasives_compare.find blk_id s))
+        return (Tjr_map.With_stdcmp.find blk_id s))
   in
   let write_many writes = 
     writes |> List.map (fun (blk_id,blk) -> write ~blk_id ~blk)

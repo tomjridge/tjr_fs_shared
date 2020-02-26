@@ -61,7 +61,10 @@ module Rt_blk = Rt_blk
 (** {2 Kv ops} *)
 
 module Kvop = Kvop
-include Kvop.Kv_op_type
+type ('k,'v)kvop = ('k,'v)Kvop.kvop
+module Kvop_map = Kvop.Kvop_map
+
+(* include Kvop.Kv_op_type *)
 
 (*
 (* NOTE we don't want to pollute the namespace with all the @@deriving

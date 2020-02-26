@@ -1,5 +1,5 @@
 (* open Shared_intf *)
-open Buf_ops
+(* open Buf_ops *)
 open Blk_intf
 
 module Internal = struct
@@ -60,8 +60,7 @@ module Internal = struct
 end
 (* open Internal *)
 
-(** The factory takes an arg of the form AN... and returns a result of
-   the form RN...; add further args and results here *)
+(** The various make_n functions have types as follows (arg is a merlin-visible form of documentation *)
 
 type arg = 
   | A1_string_4096
@@ -72,10 +71,12 @@ type arg =
 - A2 - bytes
 - A3 - bigarray *)
 
+(*
 type res = 
   | R1 of string blk_ops
   | R2 of bytes blk_ops
   | R3 of ba_buf blk_ops
+*)
 
 let blk_sz = blk_sz_4096
 
@@ -94,7 +95,9 @@ let make_3 () =
       Bigstring.to_bytes ba)
   }
 
+(*
 let make = function
   | A1_string_4096 -> R1 (make_1())
   | A2_bytes_4096 -> R2 (make_2())
   | A3_ba_4096 -> R3 (make_3())
+*)
