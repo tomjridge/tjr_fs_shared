@@ -28,6 +28,8 @@ type arg =
 
   | A6_blk_ba__lwt of a6
 
+  | A7_blk_ba__lwt of Lwt_unix.file_descr
+
 and a6 = Filename of string | Fd of Lwt_unix.file_descr 
 
 (*  
@@ -155,6 +157,20 @@ let rec make_6 (x:a6) : ((module R6),lwt)m = L.(
       return (module A : R6))
 
 let _ = make_6
+
+let make_7 fd = 
+  let blk_ops = Blk_factory.(make_3 ()) in
+  let module A = struct
+    let fd = fd 
+    let close_blk_dev () = L.from_lwt(Lwt_unix.close fd) 
+    let blk_dev = Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
+    let blk_dev_ops = profile_blk_dev |> function
+      | true -> add_profiling blk_dev
+      | false -> blk_dev
+  end
+  in
+  (module A : R6)
+
 
 
 (*
