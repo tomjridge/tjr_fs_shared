@@ -26,11 +26,12 @@ type arg =
   | A5_blk_ba__lwt_fd
     (** blk is a ba_4096; monad is lwt; blk_dev on fd *)
 
-  | A6_blk_ba__lwt of a6
+  (* | A6_blk_ba__lwt of a6 *)
 
   | A7_blk_ba__lwt of Lwt_unix.file_descr
+  | A8_blk_ba__lwt of string
 
-and a6 = Filename of string | Fd of Lwt_unix.file_descr 
+(* and a6 = Filename of string | Fd of Lwt_unix.file_descr  *)
 
 (*  
 open Tjr_map
@@ -137,6 +138,7 @@ let make_5 fd : (blk_id,Bigstring.t,lwt)blk_dev_ops =
   let blk_ops = Blk_factory.(make_3 ()) in
   Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
 
+(*
 let rec make_6 (x:a6) : ((module R6),lwt)m = L.(
     x |> function
     | Filename filename -> (
@@ -157,6 +159,8 @@ let rec make_6 (x:a6) : ((module R6),lwt)m = L.(
       return (module A : R6))
 
 let _ = make_6
+*)
+
 
 let make_7 fd = 
   let blk_ops = Blk_factory.(make_3 ()) in
@@ -171,7 +175,9 @@ let make_7 fd =
   in
   (module A : R6)
 
-
+let make_8 fn = L.(
+    from_lwt (Lwt_unix.(openfile fn [O_CREAT;O_RDWR] Tjr_file.default_create_perm)) 
+    >>= fun fd -> return (make_7 fd))
 
 (*
 let make = function
