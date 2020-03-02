@@ -67,52 +67,83 @@ type lwt = Tjr_monad.lwt
 (**/**)
 module L = Tjr_monad.With_lwt 
 
-[%%if PROFILE_BLK_DEV]
-let profile_blk_dev = true
-[%%else]
-let profile_blk_dev = false
-[%%endif]
+module Pvt = struct
+  [%%if PROFILE_BLK_DEV]
+  let profile_blk_dev = true
+  let _ : unit = Printf.printf "Blk_dev_factory: profiling enabled\n%!"
+  [%%else]
+  let profile_blk_dev = false
+  [%%endif]
 
-let 
-  [r1; w1; w2 ] =
-  ["r1" ; "w1"; "w2" ]
-  |> List.map Tjr_profile.intern[@@warning "-8"]
+  [%%if DEBUG_BLK_DEV]
+  let debug_blk_dev = true
+  let _ : unit = Printf.printf "Blk_dev_factory: debug enabled\n%!"
+  [%%else]
+  let debug_blk_dev = false
+  [%%endif]
 
-let add_profiling blk_dev_ops = 
-  let open Tjr_monad.With_lwt in
-  let prf = Tjr_profile.make_profiler 
-      ~print_header:"blk profiler" 
-      ~print_at_exit:true () 
-  in
-  let { blk_sz; read; write; write_many } = blk_dev_ops in
-  let read ~blk_id = 
-    prf.mark r1;
-    read ~blk_id >>= fun b ->
-    prf.mark (-1*r1);
-    return b
-  in
-  let write ~blk_id ~blk = 
-    prf.mark w1;
-    write ~blk_id ~blk >>= fun () ->
-    prf.mark (-1*w1);
-    return ()
-  in
-  let write_many ws = 
-    prf.mark w2;
-    write_many ws >>= fun () ->
-    prf.mark (-1*w2);
-    return ()
-  in
-  { blk_sz; read;write;write_many }
+
+
+  let 
+    [r1; w1; w2 ] =
+    ["r1" ; "w1"; "w2" ]
+    |> List.map Tjr_profile.intern[@@warning "-8"]
+
+  let add_profiling blk_dev_ops = 
+    let open Tjr_monad.With_lwt in
+    let prf = Tjr_profile.make_profiler 
+        ~print_header:"blk profiler" 
+        ~print_at_exit:true () 
+    in
+    let { blk_sz; read; write; write_many } = blk_dev_ops in
+    let read ~blk_id = 
+      prf.mark r1;
+      read ~blk_id >>= fun b ->
+      prf.mark (-1*r1);
+      return b
+    in
+    let write ~blk_id ~blk = 
+      prf.mark w1;
+      write ~blk_id ~blk >>= fun () ->
+      prf.mark (-1*w1);
+      return ()
+    in
+    let write_many ws = 
+      prf.mark w2;
+      write_many ws >>= fun () ->
+      prf.mark (-1*w2);
+      return ()
+    in
+    { blk_sz; read;write;write_many }
+
+
+  let add_debug_to_blk_dev_ops (blk_dev_ops:(blk_id,_,_)blk_dev_ops) = 
+    let module B = Blk_id_as_int in
+    let read ~blk_id =
+      Printf.printf "blk_dev_ops %s: read %d\n%!" __LOC__ (B.to_int blk_id);
+      blk_dev_ops.read ~blk_id
+    in
+    let write ~blk_id ~blk = 
+      Printf.printf "blk_dev_ops %s: write %d\n%!" __LOC__ (B.to_int blk_id);
+      blk_dev_ops.write ~blk_id ~blk
+    in
+    { blk_dev_ops with read; write }
+
+  let _ = add_debug_to_blk_dev_ops                           
+
+  let maybe_debug = fun x -> 
+    if debug_blk_dev then x |> add_debug_to_blk_dev_ops else x
+end
+open Pvt
 (**/**)
 
 let make_1 fd : (blk_id,string,lwt)blk_dev_ops= 
   let blk_ops = Blk_factory.make_1 () in
-  Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
+  Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd |> maybe_debug
 
 let make_2 fd : (blk_id,bytes,lwt)blk_dev_ops = 
   let blk_ops = Blk_factory.make_2 () in
-  Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
+  Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd |> maybe_debug
 
 let make_3 () : (('a, 'b) stdmap, lwt) Tjr_monad.with_state -> ('a, 'b, lwt) blk_dev_ops= 
   let blk_ops = Blk_factory.make_2 () in
@@ -120,7 +151,8 @@ let make_3 () : (('a, 'b) stdmap, lwt) Tjr_monad.with_state -> ('a, 'b, lwt) blk
     Blk_dev_in_mem.make_blk_dev_in_mem
       ~monad_ops:lwt_monad_ops
       ~blk_sz:blk_sz_4096
-      ~with_state)
+      ~with_state
+    |> maybe_debug)
   in
   f
 
@@ -130,13 +162,14 @@ let make_4 : (('a,'b)stdmap,lwt)with_state -> ('a,'b,lwt)blk_dev_ops =
     Blk_dev_in_mem.make_blk_dev_in_mem
       ~monad_ops:lwt_monad_ops
       ~blk_sz:blk_sz_4096
-      ~with_state)
+      ~with_state
+    |> maybe_debug)
   in
   f
 
 let make_5 fd : (blk_id,Bigstring.t,lwt)blk_dev_ops = 
   let blk_ops = Blk_factory.(make_3 ()) in
-  Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd
+  Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd |> maybe_debug
 
 (*
 let rec make_6 (x:a6) : ((module R6),lwt)m = L.(
@@ -171,6 +204,7 @@ let make_7 fd =
     let blk_dev_ops = profile_blk_dev |> function
       | true -> add_profiling blk_dev
       | false -> blk_dev
+    let blk_dev_ops = blk_dev_ops |> maybe_debug
   end
   in
   (module A : R6)

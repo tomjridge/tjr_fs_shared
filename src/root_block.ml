@@ -1,4 +1,5 @@
-(** Internal root block operations *)
+(** Internal root block operations; essentially reading and writing a
+   single piece of data to/from disk *)
 open Blk_intf
 open Buf_factory.Buf_as_bigarray
 open Tjr_monad.With_lwt
@@ -11,7 +12,7 @@ module type RT_BLK = sig
   type blk = ba_buf
     
   (** a container for data etc: data*blk_id*... *)
-  type rt_blk
+  (* type rt_blk *)
 
   (** typically lwt *)
   type t = lwt
@@ -22,19 +23,12 @@ module type RT_BLK = sig
   (* NOTE the blk operations and the identity of the root blk are set
      at creation time *)
 
-  val sync_to_disk: rt_blk -> (unit,t)m
-  (* val sync_from_disk: unit -> (rt_blk,t)m *)
-
-  (** typically blk_id is 0 *)
-  val make: blk_dev_ops:(blk_id,blk,t)blk_dev_ops -> blk_id:blk_id -> (rt_blk,t)m
-      
   val read_from_disk: blk_dev_ops:(blk_id,blk,t)blk_dev_ops -> blk_id:blk_id -> (data,t)m
 
   val write_to_disk: blk_dev_ops:(blk_id,blk,t)blk_dev_ops -> blk_id:blk_id -> data:data -> (unit,t)m
-
 end
 
-module Make(S:sig type data[@@deriving bin_io] end) = struct
+module Make(S:sig type data[@@deriving bin_io] end) : RT_BLK with type data=S.data = struct
   include S
 
   type blk_id = Blk_id_as_int.blk_id
@@ -43,12 +37,13 @@ module Make(S:sig type data[@@deriving bin_io] end) = struct
   (** typically lwt *)
   type t = lwt
 
+(*
   type rt_blk = {
     blk_dev_ops:(blk_id,blk,t)blk_dev_ops;
     blk_id:blk_id;
     data:data;
   }
-
+*)
 (*
   let make ~(blk_dev_ops:(blk_id,blk,t)blk_dev_ops) ~blk_id = 
     (* let blk_id = Blk_id_as_int.of_int 0 in *)
