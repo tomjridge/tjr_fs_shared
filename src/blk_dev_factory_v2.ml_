@@ -1,0 +1,25 @@
+(** Like {!Blk_dev_factory}, but using objects and classes *)
+
+open Blk_intf
+open Std_types
+open Tjr_monad.With_lwt 
+
+class type blk_dev_factory = object
+  method open_: 
+    fn:string -> flgs:Lwt_unix.open_flag list -> (Lwt_unix.file_descr,t)m
+  method from_fd: Lwt_unix.file_descr -> (blk_id,blk,t)blk_dev_ops
+end
+
+let blk_dev_factory : blk_dev_factory = 
+  let open_ ~fn ~flgs = 
+    from_lwt (Lwt_unix.(openfile fn flgs Tjr_file.default_create_perm)) 
+  in   
+  let from_fd fd = 
+      Blk_dev_factory.(make_7 fd) |> fun (x: (module Blk_dev_factory.R6)) ->
+      let module X = (val x) in
+      X.blk_dev_ops
+  in
+  object
+    method open_=open_
+    method from_fd=from_fd
+  end

@@ -56,6 +56,7 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 
 module Blk_dev_factory = Blk_dev_factory
 
+
 module Root_block = Root_block
 
 (** {2 Kv ops} *)
@@ -134,8 +135,12 @@ type ('k,'v,'buf) kv_mshlr = ('k,'v,'buf)Marshal_factory.kv_mshlr = {
   v_mshlr: ('v,'buf) mshlr;
 }
 
+(** {2 Std types} *)
+
+module Std_types = Std_types
 
 (** {2 Testing} *)
+
 
 module Test = Test
 
