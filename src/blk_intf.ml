@@ -36,12 +36,14 @@ module Blk_id_as_int : sig
   type blk_id[@@deriving bin_io, yojson]
   val of_int: int -> blk_id
   val to_int: blk_id -> int
+  val inc: blk_id -> blk_id
   val incr: blk_id ref -> unit
 end = struct
   open Bin_prot.Std
   type blk_id = int[@@deriving bin_io, yojson]
   let of_int x = x
   let to_int x = x
+  let inc x = x+1
   let incr x = x:=!x+1
 end
 
