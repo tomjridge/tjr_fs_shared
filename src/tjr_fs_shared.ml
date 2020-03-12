@@ -122,6 +122,36 @@ let lwt_file_ops = File_ops.lwt_file_ops
 
 (** {2 Marshalling} *)
 
+(** There are basically two types of marshalling one might
+   consider. They differ in the behaviour when attempting to marshal
+   to a point in a buffer where the remaining space is not
+   sufficient. In the first "max-size-based" model, the marshaller
+   knows the max size of an element, and the remaining space, and then
+   can determine ahead of marshalling if the space is (potentially)
+   not sufficient. In this case, the marshaller can abort early
+   without attempting any modification of the buffer. However, it may
+   be that the particular element would have actually fit the space,
+   so the approach may be inefficient. Maybe the marshaller can
+   calculate the marshalled size of each element (without actually
+   performing the marshalling). As mentioned in the bin_prot
+   documentation, this is rare because being able to calculate the
+   marshalled size of an elt is often as difficult as trying to
+   marshal the element (and failing when the space is
+   insufficient). So if we assume the decision is based on the
+   max-size, this approach may be inefficient. However, crucially, in
+   the case that the marshalling is not attempted because of
+   insufficient space, the buffer is unchanged.
+
+This should be contrasted with the "always-try-to-write" approach,
+   where the marshalling is attempted regardless of the available
+   space. If an error occurs (lack of space), the marshalling is
+   aborted. In this case, the buffer will almost certainly be altered
+   from the write position onwards (because it is too costly to record
+   what these bytes are and replace them on a failed marshal).
+
+The B-tree datastructure arguably favours the "max-size-based" model,
+   and so this is mostly the approach we take here.  *)
+
 module Marshal_factory = Marshal_factory
 
 type ('a,'buf) mshlr = ('a,'buf)Marshal_factory.mshlr = {
