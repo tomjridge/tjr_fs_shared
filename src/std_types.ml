@@ -26,3 +26,22 @@ open Blk_intf
 (* FIXME perhaps just blk_dev_ops and blk_allocator_ops ? *)
 type nonrec std_blk_dev_ops = (blk_id,blk,t)blk_dev_ops
 type nonrec std_blk_allocator_ops = (r,t)blk_allocator_ops
+
+let buf_to_blk : buf->blk = fun x -> x
+let blk_to_buf : blk->buf = fun x -> x
+
+
+let make_blk_allocator: blk_id ref -> (blk_id,t)blk_allocator_ops = fun b_ref ->    
+  let open With_lwt in
+  let blk_alloc () = 
+    let r = !b_ref in
+    B.incr b_ref;
+    return r
+  in
+  let blk_free blk_id = 
+    (* FIXME do nothing for this simple allocator *)
+    return ()
+  in
+  { blk_alloc; blk_free }
+
+    
