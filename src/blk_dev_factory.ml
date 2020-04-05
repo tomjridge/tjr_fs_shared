@@ -5,6 +5,9 @@
 open Blk_intf
 open Buf_ops
 
+let default_create_perm = Tjr_file.default_create_perm
+
+
 (** don't open this module *)
 type blk_id = Blk_id_as_int.blk_id
 type ('blk_id,'blk,'t)blk_dev_ops = ('blk_id,'blk,'t)Blk_intf.blk_dev_ops
@@ -213,6 +216,23 @@ let make_8 fn = L.(
     from_lwt (Lwt_unix.(openfile fn [O_CREAT;O_RDWR] Tjr_file.default_create_perm)) 
     >>= fun fd -> return (make_7 fd))
 
+
+let make_9 fn = L.(
+    let blk_ops = Blk_factory.(make_3 ()) in
+    from_lwt Lwt_unix.(openfile fn [O_CREAT;O_RDWR] default_create_perm) >>= fun fd -> 
+    let blk_dev = Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd in
+    let blk_dev_ops = profile_blk_dev |> function
+      | true -> add_profiling blk_dev
+      | false -> blk_dev in
+    let blk_dev_ops = blk_dev_ops |> maybe_debug in
+    return (object
+      method blk_dev_ops=blk_dev_ops
+      method fd=fd
+    end))
+         
+let _ = make_9
+
+        
 (*
 let make = function
   | A1_string_4096_lwt_fd -> 
