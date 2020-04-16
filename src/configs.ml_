@@ -1,0 +1,48 @@
+(** Utilities for handling config files.
+
+The environment variable "TJR_CONFIGS_DIR", if set, contains the
+   config files.
+
+At some point after module initialization, the "run_load_hooks" method
+   is called (once only). This is responsible for running all
+   registered hooks.
+
+Each individual library typically registers a hook with the
+   "add_load_hook" method. This function will usually check the
+   configs_dir, and if not set it will try to load a config from the
+   current directory.
+
+At the moment, if TJR_CONFIGS_DIR is not set, we set it anyway to
+   /tmp, to avoid libraries trying to load configs from the current
+   directory. So best practice is to always have this var set to point
+   to your configs directory.
+
+ *)
+
+open struct
+  let hooks : (unit -> unit) list ref = ref [] 
+
+  let add_load_hook f = hooks:=f::!hooks
+
+  let run_hooks = lazy (
+    !hooks |> List.rev |> List.iter (fun f -> f()))
+
+  let _ = run_hooks
+
+  let run_load_hooks () = 
+    (* run once *)
+    assert(not (Lazy.is_val run_hooks));
+    Lazy.force run_hooks
+
+  let configs_dir = lazy (
+    Sys.getenv_opt "TJR_CONFIGS_DIR" |> function
+    | None -> "/tmp"
+    | Some s -> s)
+    
+  let configs_dir () = Lazy.force configs_dir
+  
+end
+
+let add_load_hook = add_load_hook  
+let run_load_hooks = run_load_hooks
+let configs_dir = configs_dir
