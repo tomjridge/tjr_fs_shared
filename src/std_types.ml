@@ -45,3 +45,8 @@ let make_blk_allocator: blk_id ref -> (blk_id,t)blk_allocator_ops = fun b_ref ->
   { blk_alloc; blk_free }
 
     
+let buf_create () = buf_ops.create (Blk_sz.to_int blk_sz)
+
+
+let s256_to_string (s:Str_256.str_256) = (s :> string)
+
