@@ -73,14 +73,14 @@ module L = Tjr_monad.With_lwt
 module Pvt = struct
   [%%if PROFILE_BLK_DEV]
   let profile_blk_dev = true
-  let _ : unit = Printf.printf "Blk_dev_factory: profiling enabled\n%!"
+  let _ : unit = Printf.printf "Profiling enabled (shared/%s)\n%!" __FILE__
   [%%else]
   let profile_blk_dev = false
   [%%endif]
 
   [%%if DEBUG_BLK_DEV]
   let debug_blk_dev = true
-  let _ : unit = Printf.printf "Blk_dev_factory: debug enabled\n%!"
+  let _ : unit = Printf.printf "Debug enabled (shared/%s)\n%!"__FILE__
   [%%else]
   let debug_blk_dev = false
   [%%endif]
@@ -91,6 +91,8 @@ module Pvt = struct
     [r1; w1; w2 ] =
     ["r1" ; "w1"; "w2" ]
     |> List.map Tjr_profile.intern[@@warning "-8"]
+
+  (* $(TODO("add a profiler print header which takes a string, short suffix eg bt-ex and file")) *)
 
   let add_profiling blk_dev_ops = 
     let open Tjr_monad.With_lwt in

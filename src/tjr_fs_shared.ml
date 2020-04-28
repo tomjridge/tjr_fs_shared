@@ -179,6 +179,12 @@ module Test = Test
 module Log = Log
 
 
+(** {2 Runtime config support} *)
+
+(* FIXME move all runtime configs to use this interface *)
+let runtime_config_factory = Runtime_config_factory.runtime_config_factory
+
+
 (*
 
 module Internal = struct

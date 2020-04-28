@@ -85,8 +85,10 @@ let make_2 () = Internal.Bytes_.make ~blk_sz
 let make_3 () = 
   { blk_sz;
     of_string=(fun s ->
-      assert(String.length s = Blk_sz.to_int blk_sz);        
-      Bigstring.of_string s);
+      assert(String.length s <= Blk_sz.to_int blk_sz);        
+      let buf = Bigstring.create (Blk_sz.to_int blk_sz) in
+      Bigstring.blit_of_string s 0 buf 0 (String.length s);
+      buf);
     to_string=(fun ba -> Bigstring.to_string ba);
     of_bytes=(fun bs ->
       assert(Bytes.length bs = Blk_sz.to_int blk_sz);
@@ -94,6 +96,8 @@ let make_3 () =
     to_bytes=(fun ba -> 
       Bigstring.to_bytes ba)
   }
+
+
 
 (*
 let make = function
