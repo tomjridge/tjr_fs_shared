@@ -112,7 +112,7 @@ module Write_back_cache_v2_DONT_USE = Write_back_cache_v2
 
 module Write_back_cache_v3 = Write_back_cache_v3
 
-
+module Write_back_cache = Write_back_cache_v3
 
 
 (** {2 File operations} *)

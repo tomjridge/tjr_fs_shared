@@ -43,7 +43,7 @@ The operations:
 - create: takes a capacity, and delta, the default number of lru-elts
   to remove on trim
 
-- find, insert, delete; find and insert promote automatically; delete is probably not used (we trim instead)
+- find, insert, delete; find and insert promote automatically; delete is used for B-tree freeing blks (we could trim instead)
 
 - promote: to touch a key so that it has just been used; probably we don't use this (find and insert promote automatically)
 
@@ -75,8 +75,10 @@ type ('k,'v,'t) wbc_ops = {
   size             : 't -> int;
 
   find             : 'k -> 't -> ('v * bool) option * 't;
+  (** For find, if None is returned, the cache is guaranteed to be unaltered *)
+
   insert           : 'k -> 'v*bool -> 't -> 't;
-  (* delete           : 'k -> 't -> 't; *)
+  delete           : 'k -> 't -> 't;
   (* promote          : 'k -> 't -> 't; *)
   needs_trim       : 't -> bool;
   trim             : 't -> ('k*'v) list * 't;
@@ -130,7 +132,7 @@ module Pvt_make(K:K)(V:V) = struct
       let insert k v t = 
         Lru.add k v t |> Lru.promote k
 
-      let _delete k t = Lru.remove k t
+      let delete k t = Lru.remove k t
 
       let _promote k t = Lru.promote k t
 
@@ -162,8 +164,8 @@ module Pvt_make(K:K)(V:V) = struct
     in
     object 
       method empty=create() 
-      method ops={ cap; delta; size; find; insert; 
-                   (* delete; promote; *)
+      method ops={ cap; delta; size; find; insert; delete;
+                   (* promote; *)
                    needs_trim; trim; clean; bindings } 
     end
 
