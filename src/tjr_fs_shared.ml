@@ -106,9 +106,11 @@ module Map_with_key_traversal = Map_with_key_traversal
 
 (** {2 Write back cache} *)
 
-module Write_back_cache = Write_back_cache
+module Write_back_cache_v1_DONT_USE = Write_back_cache
 
 module Write_back_cache_v2_DONT_USE = Write_back_cache_v2
+
+module Write_back_cache_v3 = Write_back_cache_v3
 
 
 

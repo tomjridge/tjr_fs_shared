@@ -1,4 +1,4 @@
-(** A wrapper around pqwy/lru.
+(** DON'T USE A wrapper around pqwy/lru.
 
 At the moment, we use the pqwy functional implementation, but this is
    much slower than the imperative version (which we should use in
