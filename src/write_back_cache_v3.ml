@@ -70,8 +70,6 @@ $(ABBREV("wbc is short for write-back cache"))
 
 
 type ('k,'v,'t) wbc_ops = {
-  cap              : int;
-  delta            : int;
   size             : 't -> int;
 
   find             : 'k -> 't -> ('v * bool) option * 't;
@@ -86,9 +84,9 @@ type ('k,'v,'t) wbc_ops = {
   bindings         : 't -> ('k * ('v * bool)) list;
 }
 
-type ('k,'v,'t) wbc_factory = < 
-  make_wbc: cap:int -> delta:int -> < empty:'t; ops: ('k,'v,'t) wbc_ops >
->
+type ('k,'v,'t) wbc_o = < empty:'t; cap:int; delta:int; ops: ('k,'v,'t) wbc_ops >
+
+type ('k,'v,'t) wbc_factory = < make_wbc: cap:int -> delta:int -> ('k,'v,'t)wbc_o >
 
 module type K = Stdlib.Map.OrderedType
 
@@ -164,7 +162,9 @@ module Pvt_make(K:K)(V:V) = struct
     in
     object 
       method empty=create() 
-      method ops={ cap; delta; size; find; insert; delete;
+      method cap = cap
+      method delta = delta
+      method ops={ size; find; insert; delete;
                    (* promote; *)
                    needs_trim; trim; clean; bindings } 
     end
