@@ -167,6 +167,13 @@ type ('k,'v,'buf) kv_mshlr = ('k,'v,'buf)Marshal_factory.kv_mshlr = {
   v_mshlr: ('v,'buf) mshlr;
 }
 
+
+(** {2 Marshalling with bin-prot} *)
+
+module Pvt_bin_prot_marshalling = Bin_prot_marshalling
+type 'a bp_mshlr = 'a Pvt_bin_prot_marshalling.bp_mshlr
+let bp_mshlrs = Pvt_bin_prot_marshalling.bp_mshlrs
+
 (** {2 Std types} *)
 
 module Std_types = Std_types
