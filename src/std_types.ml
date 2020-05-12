@@ -1,8 +1,11 @@
 (** Common types we use in examples *)
+
+
 open Buf_ops
 (* open Bin_prot.Std *)
 
 (** Standard types: t = lwt; blk=ba_buf; r=blk_id *)
+
 type t = lwt
 type blk = ba_buf
 type blk_id = Blk_intf.Blk_id_as_int.blk_id[@@deriving bin_io, yojson]
@@ -12,6 +15,9 @@ type buf = ba_buf
 let buf_ops = Buf_factory.Buf_as_bigarray.ba_buf_ops
 
 let monad_ops = lwt_monad_ops
+
+let async = With_lwt.async
+let event_ops = With_lwt.event_ops
 
 let blk_ops = Blk_factory.make_3()
 
