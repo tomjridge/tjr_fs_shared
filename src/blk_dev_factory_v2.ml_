@@ -1,7 +1,7 @@
 (** Like {!Blk_dev_factory}, but using objects and classes *)
 
 open Blk_intf
-open Std_types
+open Std_1
 open Tjr_monad.With_lwt 
 
 class type blk_dev_factory = object

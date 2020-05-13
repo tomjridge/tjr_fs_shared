@@ -174,12 +174,19 @@ module Pvt_bin_prot_marshalling = Bin_prot_marshalling
 type 'a bp_mshlr = 'a Pvt_bin_prot_marshalling.bp_mshlr
 let bp_mshlrs = Pvt_bin_prot_marshalling.bp_mshlrs
 
-(** {2 Std types} *)
 
-module Std_types = Std_types
+(** {2 Standard types and defns} *)
+
+module Sh_ctxt = Sh_ctxt
+
+module Sh_std_ctxt = Sh_ctxt.Std
+
+class virtual ['r,'blk,'buf,'t] sh_ctxt = ['r,'blk,'buf,'t] Sh_ctxt.sh_ctxt
+
+class sh_std_ctxt = Sh_std_ctxt.sh_std_ctxt
+
 
 (** {2 Testing} *)
-
 
 module Test = Test
 
