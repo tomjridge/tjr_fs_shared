@@ -43,9 +43,9 @@ let s256_mshlr : str_256 bp_mshlr = (
     in
     (module X))
 
-let r_mshlr : Sh_ctxt.Std.r bp_mshlr = (
+let r_mshlr : Shared_ctxt.r bp_mshlr = (
     let module X = struct
-      type t = Sh_ctxt.Std.r[@@deriving bin_io]
+      type t = Shared_ctxt.r[@@deriving bin_io]
       let max_sz = 9
     end
     in
