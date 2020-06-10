@@ -247,6 +247,27 @@ type 'a bp_mshlr = 'a Pvt_bin_prot_marshalling.bp_mshlr
 let bp_mshlrs = Pvt_bin_prot_marshalling.bp_mshlrs
 
 
+(** {2 Util: set_once...} *)
+
+class ['a] set_once debug_name = object
+  val mutable x = ((Obj.magic ()):'a)
+  val mutable is_set = false
+  method get =
+    assert(
+      if not is_set then 
+        (Printf.printf "set_once, not initialized: %s\n%!" debug_name; true) 
+      else true);
+    assert(is_set);
+    x
+  method set y = 
+    assert(not is_set);
+    x<-y;
+    is_set <- true
+  method is_set = is_set
+end
+
+
+
 (** {2 Standard types and defns} *)
 
 (**
