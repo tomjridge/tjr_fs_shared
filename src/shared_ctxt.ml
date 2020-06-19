@@ -44,6 +44,10 @@ module B = Blk_intf.Blk_id_as_int
 type blk_dev_ops' = (blk_id,blk,t)blk_dev_ops
 
 let monad_ops = lwt_monad_ops
+
+let ( >>= ) = monad_ops.bind
+let return = monad_ops.return
+
 let async = With_lwt.async
 let event_ops = With_lwt.event_ops
 
@@ -55,6 +59,7 @@ let r_size = 9 (* max size of r=blk_id when marshalled *)
 let buf_ops = Buf_factory.Buf_as_bigarray.ba_buf_ops
 let blk_ops = Blk_factory.make_3()
 let blk_sz = Blk_intf.blk_sz_4096
+
 let buf_to_blk : buf->blk = fun x -> x
 let blk_to_buf : blk->buf = fun x -> x
 let buf_create = fun () -> buf_ops.create (Blk_sz.to_int blk_sz)

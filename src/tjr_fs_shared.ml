@@ -244,6 +244,7 @@ type ('k,'v,'buf) kv_mshlr = ('k,'v,'buf)Marshal_factory.kv_mshlr = {
 
 module Pvt_bin_prot_marshalling = Bin_prot_marshalling
 type 'a bp_mshlr = 'a Pvt_bin_prot_marshalling.bp_mshlr
+type 'a ba_mshlr = 'a Pvt_bin_prot_marshalling.ba_mshlr
 let bp_mshlrs = Pvt_bin_prot_marshalling.bp_mshlrs
 
 
