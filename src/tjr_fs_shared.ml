@@ -55,6 +55,7 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 (* module Common_blk_stores = Common_blk_stores *)
 
 module Blk_dev_factory = Blk_dev_factory
+let blk_devs = Blk_dev_factory.blk_devs
 
 
 module Root_block = Root_block
@@ -239,6 +240,7 @@ type ('k,'v,'buf) kv_mshlr = ('k,'v,'buf)Marshal_factory.kv_mshlr = {
   v_mshlr: ('v,'buf) mshlr;
 }
 
+let mshlrs = Marshal_factory.mshlrs
 
 (** {2 Marshalling with bin-prot} *)
 
