@@ -55,6 +55,7 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 (* module Common_blk_stores = Common_blk_stores *)
 
 module Blk_dev_factory = Blk_dev_factory
+type open_fd = Blk_dev_factory.open_fd
 let blk_devs = Blk_dev_factory.blk_devs
 
 

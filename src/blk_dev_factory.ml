@@ -5,6 +5,14 @@ open Blk_intf
 
 let default_create_perm = Tjr_file.default_create_perm
 
+class type open_fd = 
+  object
+    method fd          : Lwt_unix.file_descr
+    method blk_dev_ops : (Shared_ctxt.blk_id,Shared_ctxt.blk,Shared_ctxt.t) blk_dev_ops
+    method sync        : unit -> (unit,Shared_ctxt.t)m
+    method close       : unit -> (unit,Shared_ctxt.t)m
+  end
+
 let blk_devs = 
   let open (struct
     open Shared_ctxt
@@ -74,15 +82,17 @@ let blk_devs =
               [O_RDWR] 
             in
             from_lwt (openfile fn flgs default_create_perm) >>= fun fd ->
-            s#from_fd fd
+            return (s#from_fd fd)
           method from_fd = fun fd -> 
             Blk_dev_on_fd.make_with_lwt ~blk_ops ~fd |> fun blk_dev_ops ->            
-            return (object
+            let o : open_fd = object
               method fd = fd
               method blk_dev_ops = blk_dev_ops
               method sync () = from_lwt (Lwt_unix.fsync fd)
               method close () = from_lwt(Lwt_unix.close fd)
-            end)
+            end
+            in
+            o
         end
       end
       
