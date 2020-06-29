@@ -188,6 +188,10 @@ module Write_back_cache_v3 = Write_back_cache_v3
 
 module Write_back_cache = Write_back_cache_v3
 
+type wbc_params = Write_back_cache.wbc_params
+type ('k,'v,'t) wbc_ops = ('k,'v,'t) Write_back_cache.wbc_ops
+type ('k,'v,'t) wbc_ops_plus = ('k,'v,'t) Write_back_cache.wbc_ops_plus
+type ('k,'v,'t) wbc_factory = ('k,'v,'t) Write_back_cache.wbc_factory
 
 (** {2 File operations} *)
 

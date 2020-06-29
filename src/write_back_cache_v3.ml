@@ -84,9 +84,12 @@ type ('k,'v,'t) wbc_ops = {
   bindings         : 't -> ('k * ('v * bool)) list;
 }
 
-type ('k,'v,'t) wbc_o = < empty:'t; cap:int; delta:int; ops: ('k,'v,'t) wbc_ops >
+type wbc_params = < cap:int; delta:int >
 
-type ('k,'v,'t) wbc_factory = < make_wbc: cap:int -> delta:int -> ('k,'v,'t)wbc_o >
+(* was wbc_o *)
+type ('k,'v,'t) wbc_ops_plus = < empty:'t; cap:int; delta:int; ops: ('k,'v,'t) wbc_ops >
+
+type ('k,'v,'t) wbc_factory = < make_wbc: cap:int -> delta:int -> ('k,'v,'t)wbc_ops_plus >
 
 module type K = Stdlib.Map.OrderedType
 
