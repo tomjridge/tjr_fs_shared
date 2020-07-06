@@ -169,6 +169,18 @@ end = struct
     to_string = Bigstring.to_string;
     of_string = Bigstring.of_string;
     blit_string_to_buf = (fun ~src ~src_off ~src_len ~dst ~dst_off ->
+        assert(
+          let b1 = src_off.off+src_len.len <= String.length src in
+          let b2 = dst_off.off+src_len.len <= Bigstring.size dst in
+          if not (b1 && b2) then
+            Printf.printf "%s: failed check: %d %d %d; %d %d; %b %b\n%!"
+              __FILE__ 
+              src_off.off src_len.len (String.length src) 
+              dst_off.off (Bigstring.size dst) 
+              b1 b2
+          else
+            ();
+          b1 && b2);
         Bigstring.blit_of_string src src_off.off dst dst_off.off src_len.len;
         dst);
     blit_bytes_to_buf = (fun ~src ~src_off ~src_len ~dst ~dst_off ->
