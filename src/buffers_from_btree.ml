@@ -1,4 +1,6 @@
-(** FIXME move this elsewhere eg fs_shared (and combine with other similar modules) *)
+(** Buffer operations, moved from Tjr_btree. *)
+
+(** $(FIXME("""combine with other similar modules""")) *)
 
 open Int_like 
 
@@ -153,3 +155,24 @@ let bytes_buf_ops = Safe_bytes_buf.buf_ops
    might model things explicitly by having "buffer descriptors", and
    all buffers are actually stored somewhere in the state. This is
    probably better from the semantics point of view. *)
+
+
+module Unsafe__ba_buf : sig
+  val buf_ops: Buf_factory.Buf_as_bigarray.ba_buf buf_ops
+end = struct
+  let buf_ops = {
+    buf_create = Bigstring.create;
+    buf_size = (fun x -> {size=Bigstring.size x});
+    buf_to_string = (fun ~src ~off ~len -> 
+        Bigstring.sub_string src off.off len.len
+      );      
+    to_string = Bigstring.to_string;
+    of_string = Bigstring.of_string;
+    blit_string_to_buf = (fun ~src ~src_off ~src_len ~dst ~dst_off ->
+        Bigstring.blit_of_string src src_off.off dst dst_off.off src_len.len;
+        dst);
+    blit_bytes_to_buf = (fun ~src ~src_off ~src_len ~dst ~dst_off ->
+        Bigstring.blit_of_bytes src src_off.off dst dst_off.off src_len.len;
+        dst);
+  }
+end
