@@ -33,14 +33,15 @@ let blk_sz_4096 = Blk_sz.blk_sz_4096
    blk_id NOTE do not open this module FIXME replace with [{ blk_id:'a}]
    and [{ blk_id:int}] record *)
 module Blk_id_as_int : sig 
-  type blk_id[@@deriving bin_io, yojson]
+  type blk_id[@@deriving bin_io, yojson, sexp]
   val of_int: int -> blk_id
   val to_int: blk_id -> int
   val inc: blk_id -> blk_id
   val incr: blk_id ref -> unit
 end = struct
   open Bin_prot.Std
-  type blk_id = int[@@deriving bin_io, yojson]
+  open Sexplib.Std
+  type blk_id = int[@@deriving bin_io, yojson, sexp]
   let of_int x = x
   let to_int x = x
   let inc x = x+1

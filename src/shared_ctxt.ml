@@ -28,8 +28,8 @@ open Blk_intf
 
 type t = lwt
 type blk = ba_buf
-type blk_id = Blk_intf.Blk_id_as_int.blk_id[@@deriving bin_io, yojson]
-type r = blk_id[@@deriving bin_io, yojson]
+type blk_id = Blk_intf.Blk_id_as_int.blk_id[@@deriving bin_io, yojson, sexp]
+type r = blk_id[@@deriving bin_io, yojson, sexp]
 type buf = ba_buf
 
 (** Abbreviation *)
