@@ -9,7 +9,7 @@ all::
 
 update_generated_doc::
 	cd src && (ocamldoc_pyexpander shared_ctxt.ml)
-	cd src && (ocamldoc_pyexpander tjr_fs_shared.t.ml > tjr_fs_shared.ml)
+	cd src && (ocamldoc_pyexpander shared_ctxt_summary.t.ml > shared_ctxt_summary.ml)
 
 
 

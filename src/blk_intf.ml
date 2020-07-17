@@ -49,13 +49,16 @@ end = struct
 end
 
 module Blk_ops = struct
-  (** 
-     NOTE Conversion to a blk is expected (and the common instances do,
-     indeed!) to pad if the string/bytes are not long enough.
+  (** NOTE Conversion to a blk is expected (and the common instances
+     do, indeed!) to pad if the string/bytes are not long enough.
 
-     NOTE since blk_sz is expected to be fixed for a given blk type, we
-     don't include as a parameter on the main interface methods 
+     NOTE since blk_sz is expected to be fixed for a given blk type,
+     we don't include as a parameter on the main interface methods
 
+     FIXME really blk_ops need to support conversion to/from bufs, so
+     blk_ops should be parameterized by two types
+      
+      Are these blk_ops at all useful? if not, remove
   *)
   type 'blk blk_ops = {
     blk_sz    : blk_sz; 

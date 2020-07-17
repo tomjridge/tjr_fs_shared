@@ -1,5 +1,8 @@
 (** Represent common context using classes; don't open (use [Tjr_fs_shared.ctxt#shared]) *)
 
+include Shared_ctxt_summary
+
+
 (* $(PIPE2SH("""sed -n '/type[ ].*shared_ctxt = /,/^}/p' >GEN.shared_ctxt.ml_ """)) *)
 type ('r,'blk,'buf,'t) shared_ctxt = {
   r_cmp      : 'r -> 'r -> int;
@@ -20,17 +23,17 @@ open Blk_intf
 
 (** Common types we use in examples 
 
-    Standard types: t = lwt; blk=ba_buf; r=blk_id 
+    Standard types: t = lwt; blk=buf=ba_buf; r=blk_id=blk_id_as_int
 
 *)
 
 [@@@warning "-32"]
 
-type t = lwt
-type blk = ba_buf
+type t      = lwt
+type blk    = ba_buf
 type blk_id = Blk_intf.Blk_id_as_int.blk_id[@@deriving bin_io, yojson, sexp]
-type r = blk_id[@@deriving bin_io, yojson, sexp]
-type buf = ba_buf
+type r      = blk_id[@@deriving bin_io, yojson, sexp]
+type buf    = ba_buf
 
 (** Abbreviation *)
 module B = Blk_intf.Blk_id_as_int
@@ -39,9 +42,10 @@ module B = Blk_intf.Blk_id_as_int
 
 (* $(CONVENTION("""If we define a type abbrev for a parameterized
    type, use a prime as suffix, so we don't get confused with the
-   parameterized type""")) *)
+   parameterized type; don't define an abbrev if only 2 params or
+   less""")) *)
 
-type blk_dev_ops' = (blk_id,blk,t)blk_dev_ops
+(* type blk_dev_ops' = (blk_id,blk,t)blk_dev_ops *)
 
 let monad_ops = lwt_monad_ops
 
@@ -52,18 +56,20 @@ let async = With_lwt.async
 let event_ops = With_lwt.event_ops
 
 let r_cmp : r -> r -> int = Stdlib.compare
-let r_size = 9
-let r_cmp : r -> r -> int = Stdlib.compare
 let r_size = 9 (* max size of r=blk_id when marshalled *)
 
 let buf_ops = Buf_factory.Buf_as_bigarray.ba_buf_ops
 let blk_ops = Blk_factory.make_3()
 let blk_sz = Blk_intf.blk_sz_4096
 
+(* FIXME part of blk_ops?  *)
 let buf_to_blk : buf->blk = fun x -> x
 let blk_to_buf : blk->buf = fun x -> x
+
+(* FIXME remove buf_ops in favour of buf_create and buf_length? *)
 let buf_create = fun () -> buf_ops.create (Blk_sz.to_int blk_sz)
 
+(* FIXME this is for testing only; rename? move? *)
 let make_blk_allocator: blk_id ref -> (r,t)blk_allocator_ops = fun b_ref ->    
   let open With_lwt in
   let blk_alloc () = 

@@ -8,7 +8,7 @@ At the moment, we use the pqwy functional implementation, but this is
 
 (* FIXME FIXME use tjr_lib_core.tjr_lru *)
 
-open Internal_intf
+(* open Internal_intf *)
 
 (** 
 NOTE since we store a dirty flag (bool) with each value, some of the operations take/return a 'v*bool rather than a v
@@ -116,13 +116,15 @@ module Make_write_back_cache(K:Stdlib.Map.OrderedType)(V:sig type t end) = struc
     let dirties t = t |> bindings |> List.filter (fun (k,(v,d)) -> d) in
 *)    
     let create = create ~cap in
-    { initial_state=create; ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size; bindings }}
+    object
+      method initial_state=create; 
+      method ops= { find; insert; delete; promote; trim_1; trim; trim_if_over_cap; trim_all; size; bindings }
+    end
 
   let _ 
 : cap:int ->
 delta:int ->
-(Internal.Lru.t, (k, v, k * v, Internal.Lru.t) write_back_cache_ops)
-initial_state_and_ops
+_
 = make_write_back_cache
 
 end

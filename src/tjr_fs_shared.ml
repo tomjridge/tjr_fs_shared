@@ -3,11 +3,6 @@
 A collection of the main types provided by this library. *)
 
 
-(** {2 A record for the pair of an initial state and related operations} *)
-
-type ('a,'b) initial_state_and_ops = ('a,'b) Internal_intf.initial_state_and_ops = {initial_state:'a; ops:'b}
-
-
 (** {2 Int-like types} *)
 
 module Int_like = Int_like
@@ -16,18 +11,25 @@ module Int_like = Int_like
 
 (** {2 Buffers} *)
 
-include Buf_ops
+module Buf_ops = Buf_ops
+type 'buf buf_ops = 'buf Buf_ops.buf_ops
+
+let chr0 = Buf_ops.chr0
+
+type ba_buf = Buf_ops.ba_buf
+type ba_buf_ops = Buf_ops.ba_buf_ops
 
 module Buf_factory = Buf_factory
 open Buf_factory
-module Buf_as_bigarray = Buf_as_bigarray
-module Buf_as_bytes = Buf_as_bytes
 
+module Buf_as_bigarray = Buf_as_bigarray
 let ba_buf_ops = Buf_as_bigarray.ba_buf_ops
 
+module Buf_as_bytes = Buf_as_bytes
 let by_buf_ops = Buf_as_bytes.by_buf_ops
 
-module Buffers_from_btree = Buffers_from_btree (* FIXME combine with previous *)
+module Buffers_from_btree = Buffers_from_btree 
+(* FIXME combine with previous *)
 
 
 (** {2 Block-related types } *)
@@ -36,9 +38,6 @@ include Blk_intf
 
 
 (** {2 Block-related implementations} *)
-
-(* FIXME remove; use blk_factory *)
-(* module Common_blk_ops = Common_blk_ops *)
 
 module Blk_factory = Blk_factory 
 
@@ -55,24 +54,14 @@ module Blk_dev_on_fd = Blk_dev_on_fd
 (* module Common_blk_stores = Common_blk_stores *)
 
 module Blk_dev_factory = Blk_dev_factory
-type open_fd = Blk_dev_factory.open_fd
+
+(* FIXME remove *)
+(* type open_fd = Blk_dev_factory.open_fd *)
+
 let blk_devs = Blk_dev_factory.blk_devs
 
-
-module Root_block = Root_block
-
-
-
-(** {2 Operations extended with a "sync" operation} *)
-
-(** This is a common requirement on operations from the "lower" layer:
-   there is a need to push changes that have been submitted to the
-   lower layer, so that they are actually persistent. Maybe "flush"
-   would be a better name. *)
-type ('a,'t) with_sync = <
-  get: 'a;
-  sync: unit -> (unit,'t)m
->
+(* FIXME remove *)
+(* module Root_block = Root_block *)
 
 
 (** {2 Note on sync and the blk device layer} *)
@@ -139,20 +128,8 @@ module Kvop = Kvop
 type ('k,'v)kvop = ('k,'v)Kvop.kvop
 module Kvop_map = Kvop.Kvop_map
 
-(* include Kvop.Kv_op_type *)
 
 (*
-(* NOTE we don't want to pollute the namespace with all the @@deriving
-   functions so we dont include Kv_op_type directly *)
-type ('k,'v) kvop = ('k,'v) Kv_op_type.kvop = 
-  | Insert of 'k * 'v
-  | Delete of 'k
-    [@@deriving bin_io, yojson]
-
-type ('k,'v) kvop_map = ('k,'v) Kv_op_type.kvop_map
-module Kv_op = Kv_op
-*)
-
 (** {2 (Shared) Map ops } *)
 
 (** FIXME do we want to include this type at top level? *)
@@ -160,22 +137,22 @@ module Kv_op = Kv_op
 
 (** Map operations find,ins,del, in; insert_all; make_insert_many FIXME? note may clash with other "map_ops" so we don't include at the top-level *)
 (* module Map_ops = Map_ops *)
-module Shared_map_ops = Shared_map_ops
+(* module Shared_map_ops = Shared_map_ops *)
+*)
 
 
 (** {2 Small strings, leq 256 bytes} *)
-
-(* FIXME remove this *)
-(* type ss = Small_string.ss *)
-(* module Small_string = Small_string *)
 
 module Str_256 = Str_256
 type str_256 = Str_256.str_256
 
 
+(*
 (** {2 Maps with key traversal: get_next_binding, get_prev_binding} *)
 
+(* FIXME remove? *)
 module Map_with_key_traversal = Map_with_key_traversal
+*)
 
 
 (** {2 Write back cache} *)
@@ -193,11 +170,14 @@ type ('k,'v,'t) wbc_ops = ('k,'v,'t) Write_back_cache.wbc_ops
 type ('k,'v,'t) wbc_ops_plus = ('k,'v,'t) Write_back_cache.wbc_ops_plus
 type ('k,'v,'t) wbc_factory = ('k,'v,'t) Write_back_cache.wbc_factory
 
+
+(*
 (** {2 File operations} *)
 
 module File_ops = File_ops
 
 let lwt_file_ops = File_ops.lwt_file_ops
+*)
 
 
 (** {2 Marshalling} *)
@@ -247,6 +227,7 @@ type ('k,'v,'buf) kv_mshlr = ('k,'v,'buf)Marshal_factory.kv_mshlr = {
 
 let mshlrs = Marshal_factory.mshlrs
 
+
 (** {2 Marshalling with bin-prot} *)
 
 module Pvt_bin_prot_marshalling = Bin_prot_marshalling
@@ -255,6 +236,7 @@ type 'a ba_mshlr = 'a Pvt_bin_prot_marshalling.ba_mshlr
 let bp_mshlrs = Pvt_bin_prot_marshalling.bp_mshlrs
 
 
+(*
 (** {2 Util: set_once...} *)
 
 class ['a] set_once debug_name = object
@@ -273,47 +255,20 @@ class ['a] set_once debug_name = object
     is_set <- true
   method is_set = is_set
 end
-
-
-
-(** {2 Standard types and defns} *)
-
-(**
-{[
-type ('r,'blk,'buf,'t) shared_ctxt = {
-  r_cmp      : 'r -> 'r -> int;
-  r_size     :int;
-  buf_ops    :'buf Buf_ops.buf_ops;
-  monad_ops  : 't monad_ops;
-  async      : 't async;
-  event_ops  : 't event_ops;
-  blk_ops    : 'blk Blk_intf.blk_ops;
-  blk_sz     : Blk_intf.blk_sz;
-  buf_to_blk : 'buf -> 'blk;
-  blk_to_buf : 'blk -> 'buf;
-  buf_create : unit -> 'buf;
-}
-
-]}
 *)
+
+
+(** {2 Standard example types and defns} *)
 
 module Shared_ctxt = Shared_ctxt
 
 let ctxt = Shared_ctxt.ctxt
 
-(*
-module Sh_ctxt = Sh_ctxt
-
-module Sh_std_ctxt = Sh_ctxt.Std
-
-class virtual ['r,'blk,'buf,'t] sh_ctxt = ['r,'blk,'buf,'t] Sh_ctxt.sh_ctxt
-
-class sh_std_ctxt = Sh_std_ctxt.sh_std_ctxt
-*)
 
 (** {2 Testing} *)
 
 module Test = Test
+
 
 (** {2 Log} *)
 
@@ -324,25 +279,3 @@ module Log = Log
 
 (* FIXME move all runtime configs to use this interface *)
 let runtime_config_factory = Runtime_config_factory.runtime_config_factory
-
-
-(*
-
-module Internal = struct
-  module C = struct
-    type config = {
-      testing_enabled:bool
-    } [@@deriving yojson]
-
-    let default_config=Some{testing_enabled=false}
-    let filename = "shared_config.json"
-  end
-
-  include Tjr_config.Make(C)
-end
-
-let testing_enabled = Internal.config.testing_enabled
-let test = (if testing_enabled then (fun f -> f ()) [@inline] else fun f -> ()) 
-let assert_ = (if testing_enabled then (fun f -> assert(f())) [@inline] else fun f -> ())
-
-*)

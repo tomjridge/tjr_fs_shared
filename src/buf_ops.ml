@@ -1,3 +1,6 @@
+(** Operations on buffers *)
+
+(* FIXME probably get/set are not really used; remove them? *)
 type 'buf buf_ops = {
   create : int -> 'buf;  (** Assumed to be zero-ed *)
   get    : int -> 'buf -> char;
