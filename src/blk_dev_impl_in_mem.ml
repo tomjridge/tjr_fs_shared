@@ -1,4 +1,5 @@
-(** Simple in-memory block device. *)
+(** Simple in-memory block device. NOTE don't access this directly -
+   use blk_devs from blk_dev_factory. *)
 
 open Blk_intf
 
@@ -18,8 +19,11 @@ let make_blk_dev_in_mem ~monad_ops ~blk_sz ~with_state =
         return (Tjr_map.With_stdcmp.find blk_id s))
   in
   let write_many writes = 
-    writes |> List.map (fun (blk_id,blk) -> write ~blk_id ~blk)
-    |> join_seq ~monad_ops
+    writes |> iter_k (fun ~k ws -> match ws with
+        | [] -> return ()
+        | (blk_id,blk)::ws -> 
+          write ~blk_id ~blk >>= fun () -> 
+          k ws)
   in
   { blk_sz; read; write; write_many }
 

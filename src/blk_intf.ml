@@ -5,6 +5,8 @@ The main choices:
 - blk implementation (string, bytes, buf/bigarray etc)
 - blk_id (presumably int, but perhaps a pair of (dev,int) )
 - blk_dev (in mem, on file, on dev etc)
+
+NOTE this is included in the top-level package module
 *)
 
 
@@ -97,9 +99,81 @@ module Blk_allocator_ops = struct
 end
 include Blk_allocator_ops
 
+let add_profiling ~monad_ops ~blk_dev_ops = 
+  let ( >>= ) = monad_ops.bind in
+  let return = monad_ops.return in
+  let 
+    [r1; w1; w2 ] =
+    ["r1" ; "w1"; "w2" ]
+    |> List.map Tjr_profile.intern[@@warning "-8"]
+  in
+  let prf = Tjr_profile.make_profiler 
+      ~print_header:(Printf.sprintf "blk profiler %s" __LOC__)
+      ~print_at_exit:true () 
+  in
+  let { blk_sz; read; write; write_many } = blk_dev_ops in
+  let read ~blk_id = 
+    prf.mark r1;
+    read ~blk_id >>= fun b ->
+    prf.mark (-1*r1);
+    return b
+  in
+  let write ~blk_id ~blk = 
+    prf.mark w1;
+    write ~blk_id ~blk >>= fun () ->
+    prf.mark (-1*w1);
+    return ()
+  in
+  let write_many ws = 
+    prf.mark w2;
+    write_many ws >>= fun () ->
+    prf.mark (-1*w2);
+    return ()
+  in
+  { blk_sz;read;write;write_many }
 
 
+let add_debug (blk_dev_ops: _ blk_dev_ops) = 
+  let module B = Blk_id_as_int in
+  let read ~blk_id =
+    Printf.printf "blk_dev_ops %s: read %d\n%!" __LOC__ (B.to_int blk_id);
+    blk_dev_ops.read ~blk_id
+  in
+  let write ~blk_id ~blk = 
+    Printf.printf "blk_dev_ops %s: write %d\n%!" __LOC__ (B.to_int blk_id);
+    blk_dev_ops.write ~blk_id ~blk
+  in
+  { blk_dev_ops with read; write }
 
+
+type ('blk_id,'blk,'t,'fd) blk_dev_impl = <
+  add_debug : 
+    ('blk_id,'blk,'t)blk_dev_ops -> 
+    ('blk_id,'blk,'t)blk_dev_ops;
+
+  add_profiling: 
+    ('blk_id,'blk,'t)blk_dev_ops -> 
+    ('blk_id,'blk,'t)blk_dev_ops;
+
+  with_ : blk_sz:blk_sz -> <
+(* FIXME filename -> fd should just be part of lwt helper module
+      from_filename: fn:string -> create:bool -> init:bool ->
+        <
+          blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops;
+          fd          : 'fd;
+          sync        : unit -> (unit,'t)m;
+          close       : unit -> (unit,'t)m;
+        >;
+*)
+      from_fd: 'fd -> 
+        <
+          blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops;
+          fd          : 'fd;
+          sync        : unit -> (unit,'t)m;
+          close       : unit -> (unit,'t)m;
+        >;
+    >
+>    
 
 
 (*

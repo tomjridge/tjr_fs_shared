@@ -1,10 +1,10 @@
 (** Common blk devs; don't open *)
 
-open Blk_intf
-(* open Buf_ops *)
 
-let default_create_perm = Tjr_file.default_create_perm
+(* let default_create_perm = Tjr_file.default_create_perm *)
 
+
+(*
 class type open_fd = 
   object
     method fd          : Lwt_unix.file_descr
@@ -12,8 +12,14 @@ class type open_fd =
     method sync        : unit -> (unit,Shared_ctxt.t)m
     method close       : unit -> (unit,Shared_ctxt.t)m
   end
+*)
 
 let blk_devs = 
+  object
+    method lwt=Blk_dev_impl_lwt.lwt_impl
+  end
+
+(*
   let open (struct
     open Shared_ctxt
     open With_lwt
@@ -23,51 +29,6 @@ let blk_devs =
     (* $(TODO("""add a profiler print header which takes a string,
        short suffix eg bt-ex and file""")) *)
 
-    let add_profiling blk_dev_ops = 
-      let 
-        [r1; w1; w2 ] =
-        ["r1" ; "w1"; "w2" ]
-        |> List.map Tjr_profile.intern[@@warning "-8"]
-      in
-      let prf = Tjr_profile.make_profiler 
-          ~print_header:(Printf.sprintf "blk profiler %s" __LOC__)
-          ~print_at_exit:true () 
-      in
-      let { blk_sz; read; write; write_many } = blk_dev_ops in
-      let read ~blk_id = 
-        prf.mark r1;
-        read ~blk_id >>= fun b ->
-        prf.mark (-1*r1);
-        return b
-      in
-      let write ~blk_id ~blk = 
-        prf.mark w1;
-        write ~blk_id ~blk >>= fun () ->
-        prf.mark (-1*w1);
-        return ()
-      in
-      let write_many ws = 
-        prf.mark w2;
-        write_many ws >>= fun () ->
-        prf.mark (-1*w2);
-        return ()
-      in
-      { blk_sz; read;write;write_many }
-
-
-    let add_debug (blk_dev_ops:(blk_id,_,_)blk_dev_ops) = 
-      let module B = Blk_id_as_int in
-      let read ~blk_id =
-        Printf.printf "blk_dev_ops %s: read %d\n%!" __LOC__ (B.to_int blk_id);
-        blk_dev_ops.read ~blk_id
-      in
-      let write ~blk_id ~blk = 
-        Printf.printf "blk_dev_ops %s: write %d\n%!" __LOC__ (B.to_int blk_id);
-        blk_dev_ops.write ~blk_id ~blk
-      in
-      { blk_dev_ops with read; write }
-
-    let _ = add_debug
 
     let blk_devs =   
       object
@@ -99,6 +60,8 @@ let blk_devs =
   end)
   in
   blk_devs
+*)
+
 
 (*      
     method with_string = object
