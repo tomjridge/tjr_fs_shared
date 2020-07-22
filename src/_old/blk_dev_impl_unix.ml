@@ -1,4 +1,6 @@
-(** A basic implementation of a block device. *)
+(* FIXME resurrect
+
+(** A basic implementation of a block device; FIXME needs to be tidied and lwt code removed *)
 
 (** NOTE there are various options:
 - monad (store passing, imperative, lwt etc)
@@ -195,3 +197,4 @@ end
 module With_blk_id_as_int = Make(Blk_id_as_int)
 
 include With_blk_id_as_int
+*)

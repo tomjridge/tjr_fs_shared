@@ -1,4 +1,7 @@
-(** A basic implementation of a block device. *)
+(** A basic implementation of a block device (lwt). 
+
+NOTE don't access this directly; used blk_devs#lwt instead.
+*)
 
 (** NOTE there are various options:
 - monad (store passing, imperative, lwt etc)
@@ -6,8 +9,6 @@
 - read/write operations (interacts with the monad; lwt_unix or unix)
 
 *)
-
-(* FIXME this could be made a lot neater; also merge with other versions *)
 
 open Blk_intf
 
@@ -35,29 +36,17 @@ module With_(S:sig
 
   let _ : unit = assert(blk_sz_i > 0)
 
-
-
-
-  (** FIXME This is not safe when accessing a file descriptor, since
-     accesses need to be serialized (lseek etc) *)
-
-  (* let join xs = (List.map Tjr_monad.With_lwt.to_lwt xs)
-                |> Lwt.join
-                |> Tjr_monad.With_lwt.from_lwt *)
-  (* FIXME this mapping of an (essentially) identity function is poor *)
-
   let from_fd fd = 
     let open (struct
       let read ~(blk_id:blk_id) = 
         let x = 
           let blk_id = B.to_int blk_id in
           assert(blk_id>=0);
-          LU.lseek fd (blk_id * blk_sz_i) SEEK_SET >>= fun _ -> 
-          let buf = Bytes.make blk_sz_i (Char.chr 0) in 
-          LU.read fd buf 0 blk_sz_i >>= fun n -> 
+          let buf = Bytes.make blk_sz_i (Char.chr 0) in  
+          (* NOTE pread and pwrite are used to avoid locking at the lwt layer *)
+          LU.pread fd buf ~file_offset:(blk_id * blk_sz_i) 0 blk_sz_i >>= fun n -> 
           (* assert (n=blk_sz); we allow the file to expand automatically, so
              no reason to read any bytes since file could be empty *)
-          (* test(fun _ -> assert(n=0 || n=blk_sz)); *)
           assert(n=0 || n=blk_sz_i);
           bytes_to_blk buf |> return
         in
@@ -71,9 +60,8 @@ module With_(S:sig
           assert(blk_id>=0);           
           (* assert(not !in_use); *)
           (* in_use:=true; *)
-          LU.lseek fd (blk_id * blk_sz_i) SEEK_SET >>= fun _ -> 
+          LU.pwrite fd buf ~file_offset:(blk_id * blk_sz_i) 0 blk_sz_i >>= fun n -> 
           (* Printf.printf "%d %d\n%!" (String.length blk) blk_sz; *)
-          LU.write fd buf 0 blk_sz_i >>= fun n -> 
           (* test(fun _ -> assert (n=blk_sz)); *)
           assert (n=blk_sz_i);
           (* in_use:=false; *)
@@ -122,7 +110,8 @@ end
 
 let lwt_impl : _ blk_dev_impl = object
   method add_debug=add_debug
-  method add_profiling=fun blk_dev_ops -> add_profiling ~monad_ops:With_lwt.monad_ops ~blk_dev_ops
+  method add_profiling=fun blk_dev_ops -> 
+    add_profiling ~monad_ops:With_lwt.monad_ops ~blk_dev_ops
   method with_=fun ~blk_sz -> 
     let module X = With_(struct
         type blk=Bigstring.t

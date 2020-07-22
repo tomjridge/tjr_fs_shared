@@ -32,8 +32,7 @@ let blk_sz_4096 = Blk_sz.blk_sz_4096
 
 (** This is a common instance of blk_id; we don't open it by default
    because we want most code to be independent of the exact repn. of
-   blk_id NOTE do not open this module FIXME replace with [{ blk_id:'a}]
-   and [{ blk_id:int}] record *)
+   blk_id *)
 module Blk_id_as_int : sig 
   type blk_id[@@deriving bin_io, yojson, sexp]
   val of_int: int -> blk_id
@@ -50,26 +49,14 @@ end = struct
   let incr x = x:=!x+1
 end
 
+
 module Blk_ops = struct
-  (** NOTE Conversion to a blk is expected (and the common instances
-     do, indeed!) to pad if the string/bytes are not long enough.
-
-     NOTE since blk_sz is expected to be fixed for a given blk type,
-     we don't include as a parameter on the main interface methods
-
-     FIXME really blk_ops need to support conversion to/from bufs, so
-     blk_ops should be parameterized by two types
-      
-      Are these blk_ops at all useful? if not, remove
-  *)
-  type 'blk blk_ops = {
-    blk_sz    : blk_sz; 
-
-    of_string : string -> 'blk;
-    to_string : 'blk -> string;
-
-    of_bytes  : bytes -> 'blk;
-    to_bytes  : 'blk -> bytes;
+  (** NOTE the conversion to blk checks the length *)
+  (* $(PIPE2SH("""sed -n '/type[ ].*blk_ops = /,/}/p' >GEN.blk_ops.ml_ """)) *)
+  type ('blk,'buf) blk_ops = {
+    blk_sz: blk_sz;
+    blk_to_buf: 'blk -> 'buf;
+    buf_to_blk: 'buf -> 'blk;
   }
 end
 include Blk_ops
@@ -77,6 +64,7 @@ include Blk_ops
 
 module Blk_dev_ops = struct
   (** A block device: read and write blocks. *)
+  (* $(PIPE2SH("""sed -n '/type[ ].*blk_dev_ops = /,/}/p' >GEN.blk_dev_ops.ml_ """)) *)
   type ('blk_id,'blk,'t) blk_dev_ops = {
     blk_sz     : blk_sz; 
     write      : blk_id:'blk_id -> blk:'blk -> (unit,'t) m;
@@ -92,12 +80,15 @@ module Blk_allocator_ops = struct
 
   (** NOTE we assume alloc never fails, or that error is handled
       elsewhere in the monad; fields were named alloc and free *)
+  (* $(PIPE2SH("""sed -n '/type[ ].*blk_allocator_ops = /,/}/p' >GEN.blk_allocator_ops.ml_ """)) *)
   type ('blk_id,'t) blk_allocator_ops = {
     blk_alloc : unit -> ('blk_id,'t) m; 
     blk_free  : 'blk_id -> (unit,'t) m;
   }
 end
 include Blk_allocator_ops
+
+(**/**)
 
 let add_profiling ~monad_ops ~blk_dev_ops = 
   let ( >>= ) = monad_ops.bind in
@@ -145,7 +136,9 @@ let add_debug (blk_dev_ops: _ blk_dev_ops) =
   in
   { blk_dev_ops with read; write }
 
+(**/**)
 
+(* $(PIPE2SH("""sed -n '/type[ ].*blk_dev_impl = /,/^>/p' >GEN.blk_dev_impl.ml_ """)) *)
 type ('blk_id,'blk,'t,'fd) blk_dev_impl = <
   add_debug : 
     ('blk_id,'blk,'t)blk_dev_ops -> 
@@ -156,15 +149,6 @@ type ('blk_id,'blk,'t,'fd) blk_dev_impl = <
     ('blk_id,'blk,'t)blk_dev_ops;
 
   with_ : blk_sz:blk_sz -> <
-(* FIXME filename -> fd should just be part of lwt helper module
-      from_filename: fn:string -> create:bool -> init:bool ->
-        <
-          blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops;
-          fd          : 'fd;
-          sync        : unit -> (unit,'t)m;
-          close       : unit -> (unit,'t)m;
-        >;
-*)
       from_fd: 'fd -> 
         <
           blk_dev_ops : ('blk_id,'blk,'t)blk_dev_ops;
@@ -175,48 +159,3 @@ type ('blk_id,'blk,'t,'fd) blk_dev_impl = <
     >
 >    
 
-
-(*
-(* This is used for talks, to avoid explaining labelled args *)
-module Internal_unlabelled_blk_dev_ops = struct
-  type ('blk_id,'blk,'t) blk_dev_ops = {
-    blk_sz: blk_sz; 
-    write: 'blk_id -> 'blk -> (unit,'t) m;
-    read: 'blk_id -> ('blk,'t) m;
-  }
-end
-*)
-
-(*
-(* FIXME remove *)
-(** A blk layer has blk_ops and blk_dev_ops FIXME remove this? *)
-module Blk_layer = struct
-  (** Keep 'dev abstract since we may need to stage the
-     construction. *)
-  type ('blk,'dev) blk_layer = {
-    blk_ops: 'blk blk_ops;
-    blk_dev_ops: 'dev
-  }
-end
-
-(** NOTE to access the field names, open Blk_layer *)
-type ('blk,'dev) blk_layer = ('blk,'dev) Blk_layer.blk_layer
-*)
-
-
-(*
-
-(* FIXME sync, close? remove this; favour blkdev with flags to indicate which functionality is available *)
-(** A block store is like a block layer, but also includes an allocator *)
-module Blk_store = struct
-  type ('blk_id,'blk,'sync,'close,'t) blk_store = {
-    blk_ops           : 'blk blk_ops;
-    blk_dev_ops       : ('blk_id,'blk,'t)blk_dev_ops;
-    blk_allocator_ops : ('blk_id,'t) blk_allocator_ops;
-  }
-end
-
-(** NOTE to access field names, open Blk_store *)
-type ('blk_id,'blk,'sync,'close,'t) blk_store = ('blk_id,'blk,'sync,'close,'t) Blk_store.blk_store 
-
-*)

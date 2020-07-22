@@ -2,6 +2,8 @@
 
 A collection of the main types provided by this library. *)
 
+include Summary
+
 
 (** {2 Int-like types} *)
 
@@ -16,52 +18,69 @@ type 'buf buf_ops = 'buf Buf_ops.buf_ops
 
 let chr0 = Buf_ops.chr0
 
-type ba_buf = Buf_ops.ba_buf
-type ba_buf_ops = Buf_ops.ba_buf_ops
 
-module Buf_factory = Buf_factory
-open Buf_factory
+(** NOTE lwt uses bytes eg for pread and pwrite; FUSE prefers
+   bigarray; so we have two main buffer implementations, bytes and
+   bigarray
 
-module Buf_as_bigarray = Buf_as_bigarray
-let ba_buf_ops = Buf_as_bigarray.ba_buf_ops
+    $(ABBREV("ba = bigarray")) 
 
-module Buf_as_bytes = Buf_as_bytes
-let by_buf_ops = Buf_as_bytes.by_buf_ops
-
-module Buffers_from_btree = Buffers_from_btree 
-(* FIXME combine with previous *)
-
-
-(** {2 Block-related types } *)
-
-include Blk_intf
-
-
-(** {2 Block-related implementations} *)
-
-module Blk_factory = Blk_factory 
-
-(*
-(* FIXME remove, use blk_dev_factory *)
-module Blk_dev_in_mem = Blk_dev_in_mem
-
-module Blk_dev_on_fd = Blk_dev_on_fd
 *)
 
-(* FIXME remove *)
-(* module Common_blk_layers = Common_blk_layers *)
+type ba_buf = Buf_ops.ba_buf
 
-(* module Common_blk_stores = Common_blk_stores *)
+type ba_buf_ops = Buf_ops.ba_buf_ops
 
-module Blk_dev_factory = Blk_dev_factory
+let ba_buf_ops = Buf_ops.buf_ops#ba
 
-(* FIXME remove *)
-(* type open_fd = Blk_dev_factory.open_fd *)
+let by_buf_ops = Buf_ops.buf_ops#bytes
 
-let blk_devs = Blk_dev_factory.blk_devs
 
-(* FIXME remove *)
-(* module Root_block = Root_block *)
+(** {2 Block identifiers} *)
+
+module Blk_intf = Blk_intf
+
+module Blk_id_as_int = Blk_intf.Blk_id_as_int
+
+
+(** {2 Blocks} *)
+
+module Blk_sz = Blk_intf.Blk_sz
+type blk_sz = Blk_sz.blk_sz
+let blk_sz_4096 = Blk_sz.blk_sz_4096
+
+module Blk_ops = Blk_intf.Blk_ops
+
+let blk_ops = Blk_impls.blk_ops
+
+
+(** {2 Block devices} *)
+
+module Blk_dev_ops = Blk_intf.Blk_dev_ops
+
+type ('blk_id,'blk,'t) blk_dev_ops 
+= ('blk_id,'blk,'t) Blk_dev_ops.blk_dev_ops
+= {
+    blk_sz     : blk_sz; 
+    write      : blk_id:'blk_id -> blk:'blk -> (unit,'t) m;
+    read       : blk_id:'blk_id -> ('blk,'t) m;
+    write_many : ('blk_id*'blk)list -> (unit,'t) m  (* FIXME may want to make this a seq? *)
+  }
+
+let blk_devs = Blk_dev_impls.blk_devs
+
+
+(** {2 Block allocation} *)
+
+module Blk_allocator_ops = Blk_intf.Blk_allocator_ops
+
+type ('blk_id,'t) blk_allocator_ops 
+= ('blk_id,'t) Blk_allocator_ops.blk_allocator_ops 
+= {
+    blk_alloc : unit -> ('blk_id,'t) m; 
+    blk_free  : 'blk_id -> (unit,'t) m;
+  }
+
 
 
 (** {2 Note on sync and the blk device layer} *)
@@ -129,30 +148,10 @@ type ('k,'v)kvop = ('k,'v)Kvop.kvop
 module Kvop_map = Kvop.Kvop_map
 
 
-(*
-(** {2 (Shared) Map ops } *)
-
-(** FIXME do we want to include this type at top level? *)
-(* include Map_ops_type *)
-
-(** Map operations find,ins,del, in; insert_all; make_insert_many FIXME? note may clash with other "map_ops" so we don't include at the top-level *)
-(* module Map_ops = Map_ops *)
-(* module Shared_map_ops = Shared_map_ops *)
-*)
-
-
 (** {2 Small strings, leq 256 bytes} *)
 
 module Str_256 = Str_256
 type str_256 = Str_256.str_256
-
-
-(*
-(** {2 Maps with key traversal: get_next_binding, get_prev_binding} *)
-
-(* FIXME remove? *)
-module Map_with_key_traversal = Map_with_key_traversal
-*)
 
 
 (** {2 Write back cache} *)
@@ -169,15 +168,6 @@ type wbc_params = Write_back_cache.wbc_params
 type ('k,'v,'t) wbc_ops = ('k,'v,'t) Write_back_cache.wbc_ops
 type ('k,'v,'t) wbc_ops_plus = ('k,'v,'t) Write_back_cache.wbc_ops_plus
 type ('k,'v,'t) wbc_factory = ('k,'v,'t) Write_back_cache.wbc_factory
-
-
-(*
-(** {2 File operations} *)
-
-module File_ops = File_ops
-
-let lwt_file_ops = File_ops.lwt_file_ops
-*)
 
 
 (** {2 Marshalling} *)

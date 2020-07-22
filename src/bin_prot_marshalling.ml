@@ -15,7 +15,7 @@ Example:
  *)
 
 type ba_buf = Buf_ops.ba_buf
-let ba_buf_ops = Buf_factory.Buf_as_bigarray.ba_buf_ops
+let ba_buf_ops = Buf_ops.buf_ops#ba
 
 
 (** $(ABBREV("BP is Bin_prot")) *)
@@ -45,7 +45,7 @@ let ba_mshlr (type t) ~(mshlr:t bp_mshlr) ~(buf_sz:int) : t ba_mshlr =
       let t = bin_read_t buf ~pos_ref:(ref 0) in
       t
     let marshal = fun t -> 
-      let buf = ba_buf_ops.create buf_sz in (* NOTE not necessarily zeroed *)
+      let buf = ba_buf_ops.buf_create buf_sz in (* NOTE not necessarily zeroed *)
       let n = bin_write_t buf ~pos:0 t in
       buf
   end

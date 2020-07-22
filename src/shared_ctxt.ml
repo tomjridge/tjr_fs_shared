@@ -2,17 +2,19 @@
 
 include Shared_ctxt_summary
 
+open Buf_ops
+open Blk_intf
 
 (* $(PIPE2SH("""sed -n '/type[ ].*shared_ctxt = /,/^}/p' >GEN.shared_ctxt.ml_ """)) *)
 type ('r,'blk,'buf,'t) shared_ctxt = {
   r_cmp      : 'r -> 'r -> int;
   r_size     :int;
-  buf_ops    :'buf Buf_ops.buf_ops;
+  buf_ops    :'buf buf_ops;
   monad_ops  : 't monad_ops;
   async      : 't async;
   event_ops  : 't event_ops;
-  blk_ops    : 'blk Blk_intf.blk_ops;
-  blk_sz     : Blk_intf.blk_sz;
+  blk_ops    : ('blk,'buf) blk_ops;
+  blk_sz     : blk_sz;
   buf_to_blk : 'buf -> 'blk;
   blk_to_buf : 'blk -> 'buf;
   buf_create : unit -> 'buf;
@@ -45,29 +47,33 @@ module B = Blk_intf.Blk_id_as_int
    parameterized type; don't define an abbrev if only 2 params or
    less""")) *)
 
-(* type blk_dev_ops' = (blk_id,blk,t)blk_dev_ops *)
-
 let monad_ops = lwt_monad_ops
 
 let ( >>= ) = monad_ops.bind
+
 let return = monad_ops.return
 
 let async = With_lwt.async
+
 let event_ops = With_lwt.event_ops
 
 let r_cmp : r -> r -> int = Stdlib.compare
+
 let r_size = 9 (* max size of r=blk_id when marshalled *)
 
-let buf_ops = Buf_factory.Buf_as_bigarray.ba_buf_ops
-let blk_ops = Blk_factory.make_3()
+let buf_ops = Buf_ops.buf_ops#ba
+
+let blk_ops = Blk_impls.blk_ops#ba_ba_4096
+
 let blk_sz = Blk_intf.blk_sz_4096
 
 (* FIXME part of blk_ops?  *)
 let buf_to_blk : buf->blk = fun x -> x
+
 let blk_to_buf : blk->buf = fun x -> x
 
 (* FIXME remove buf_ops in favour of buf_create and buf_length? *)
-let buf_create = fun () -> buf_ops.create (Blk_sz.to_int blk_sz)
+let buf_create = fun () -> buf_ops.buf_create (Blk_sz.to_int blk_sz)
 
 (* FIXME this is for testing only; rename? move? *)
 let make_blk_allocator: blk_id ref -> (r,t)blk_allocator_ops = fun b_ref ->    

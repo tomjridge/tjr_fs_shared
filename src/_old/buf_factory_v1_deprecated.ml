@@ -1,6 +1,7 @@
+(*
 (** Common buffer operations *)
 
-open Buf_ops
+open Buf_ops_v1
 
 module Buf_as_bigarray = struct
 
@@ -53,3 +54,4 @@ module Buf_as_bytes = struct
 
 end
 
+*)
