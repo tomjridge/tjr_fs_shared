@@ -1,0 +1,4 @@
+(executable
+ (name "test_shared_freelist")
+ (libraries tjr_fs_shared)
+)

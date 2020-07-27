@@ -67,6 +67,8 @@ let blk_ops = Blk_impls.blk_ops#ba_ba_4096
 
 let blk_sz = Blk_intf.blk_sz_4096
 
+let blk_sz_i = Blk_sz.to_int blk_sz
+
 (* FIXME part of blk_ops?  *)
 let buf_to_blk : buf->blk = fun x -> x
 

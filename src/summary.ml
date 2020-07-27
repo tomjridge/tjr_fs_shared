@@ -43,7 +43,7 @@ type ('blk_id,'blk,'t,'fd) blk_dev_impl = <
 type 'buf buf_ops = {
   buf_create         : int -> 'buf;
   buf_length         : 'buf -> int;
-
+  buf_get            : int -> 'buf -> char;
   buf_to_string      : src:'buf -> off:offset -> len:len -> string; 
   to_string          : 'buf -> string;
   of_string          : string -> 'buf;
@@ -52,6 +52,30 @@ type 'buf buf_ops = {
   blit               : src:'buf   -> src_off:offset -> src_len:len -> dst:'buf -> dst_off:offset -> 'buf;
   blit_bytes_to_buf  : src:bytes  -> src_off:offset -> src_len:len -> dst:'buf -> dst_off:offset -> 'buf;
   blit_string_to_buf : src:string -> src_off:offset -> src_len:len -> dst:'buf -> dst_off:offset -> 'buf;
+}
+
+type ('blk_id,'t) freelist_factory = <
+  with_:
+    fn:string -> 
+    <
+
+      create: min_free:'blk_id -> ( ('blk_id,'t)freelist_ops,'t)m;
+      (** Create a new freelist *)
+
+      restore: unit -> ( ('blk_id,'t)freelist_ops,'t)m;
+      (** Restore from file *)
+
+    >      
+>
+
+type ('blk_id,'t) freelist_ops = {
+  alloc      : unit -> ('blk_id,'t)m;
+  alloc_many : int -> ('blk_id list,'t)m;
+  free       : 'blk_id -> (unit,'t)m;
+  free_many  : 'blk_id list -> (unit,'t)m;
+  sync       : unit -> (unit,'t)m;
+  (** NOTE the freelist already ensures it is crash safe; this sync is
+      really for tidy shutdown *)
 }
 
 type ('r,'blk,'buf,'t) shared_ctxt = {

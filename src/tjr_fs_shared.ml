@@ -255,6 +255,11 @@ module Shared_ctxt = Shared_ctxt
 
 let ctxt = Shared_ctxt.ctxt
 
+(** {2 Dummy freelist for testing} *)
+
+module Shared_freelist = Shared_freelist
+let shared_freelist = Shared_freelist.example
+
 
 (** {2 Testing} *)
 
