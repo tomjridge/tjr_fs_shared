@@ -85,6 +85,28 @@ let mshlrs =
       X.mshlr
 
     let int_mshlr = make_3
+      
+    let for_int_int_kvop = 
+      let module Y = struct
+        open Bin_prot.Std
+        open Kvop
+        type t = (int,int)kvop[@@deriving bin_io]
+        let max_elt_sz = 1+(2*9) (* FIXME check *)
+      end
+      in
+      let module X = Make_marshaller(Y) in
+      X.mshlr
+
+    let for_int_int_kvop_option = 
+      let module Y = struct
+        open Bin_prot.Std
+        open Kvop
+        type t = (int,int)kvop option[@@deriving bin_io]
+        let max_elt_sz = 1+1+(2*9) (* FIXME check *)
+      end
+      in
+      let module X = Make_marshaller(Y) in
+      X.mshlr
 
     let make_4 = 
       let module Y = struct
@@ -121,6 +143,8 @@ let mshlrs =
     method for_blk_id = for_blk_id
     method for_blk_id_option = make_2
     method for_s256 = make_4
+    method for_int_int_kvop = for_int_int_kvop
+    method for_int_int_kvop_option = for_int_int_kvop_option
     method for_kv = object
       method int_int = make_5
       method s256_int = make_6
