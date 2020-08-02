@@ -53,7 +53,14 @@ let ( >>= ) = monad_ops.bind
 
 let return = monad_ops.return
 
+(* $(FIXME(""" add mutexops and yield to the shared_ctxt; perhaps add a monadic ctxt which includes all the values related to the monad""")) *)
+type mutex = With_lwt.mutex
+type cvar = With_lwt.cvar
+let mutex_ops = With_lwt.mutex_ops
+
 let async = With_lwt.async
+
+let yield () = With_lwt.(yield () |> from_lwt)
 
 let event_ops = With_lwt.event_ops
 
