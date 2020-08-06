@@ -8,7 +8,7 @@ NOTE this uses value passing; to check linear usage, use the "safe_"
 
 *)
 
-(** $(FIXME("""combine with other similar modules""")) *)
+(* $(FIXME("""check linearity for sub operations (and others?)""")) *)
 
 open Int_like 
 
@@ -32,6 +32,10 @@ type 'buf buf_ops = {
   to_string          : 'buf -> string;
   of_string          : string -> 'buf;
   of_bytes           : bytes -> 'buf;
+
+  buf_sub            : buf:'buf -> off:int -> len:int -> 'buf;
+  (* NOTE buf_sub either shares the underlying buf (mutable buffers),
+     or allocates a new buf (immutable buffers) *)
 
   blit               : src:'buf   -> src_off:offset -> src_len:len -> dst:'buf -> dst_off:offset -> 'buf;
   blit_bytes_to_buf  : src:bytes  -> src_off:offset -> src_len:len -> dst:'buf -> dst_off:offset -> 'buf;
@@ -100,10 +104,13 @@ module String_ = struct
     blit_bytes_to_buf ~src:(B_.of_string src) ~src_off ~src_len ~dst ~dst_off
 
   let blit = blit_string_to_buf
+
+  let buf_sub ~buf ~off ~len = 
+    String.sub buf off len
   
   let buf_ops = 
     {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
-     blit;blit_bytes_to_buf;blit_string_to_buf;}
+     blit;blit_bytes_to_buf;blit_string_to_buf;buf_sub}
 end
 
 
@@ -154,9 +161,12 @@ module Bytes_ = struct
   
   let blit = blit_bytes_to_buf
 
+  let buf_sub ~buf ~off ~len = 
+    Bytes.sub buf off len
+
   let buf_ops = 
     {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
-     blit;blit_bytes_to_buf;blit_string_to_buf;}
+     blit;blit_bytes_to_buf;blit_string_to_buf;buf_sub}
 
 end
 
@@ -171,6 +181,7 @@ end = struct
 end
 
 
+(*
 (* The idea is to use "buffer passing", but to mark old buffers as
    "not ok". Attempts to access "not ok" buffers results in a
    runtime error. In some sense, the reference to the bytes (via the
@@ -226,11 +237,16 @@ end = struct
         blit ~src:src.bytes ~src_off ~src_len ~dst:dst.bytes ~dst_off)
 
   let _ = blit
+
+  let buf_sub ~buf ~off ~len = 
+    
+        buf_sub ~buf ~off ~len)
   
   let buf_ops = 
     {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
      blit;blit_bytes_to_buf;blit_string_to_buf;}
 end
+*)
 
 (** NOTE this does not check linearity; use something else for testing *)
 module Bigstring_ (*: sig
@@ -278,9 +294,13 @@ end*) = struct
     Bigstring.blit src src_off.off dst dst_off.off src_len.len;
     dst
 
+  (* FIXME we need to mark the resulting buf read only (or the original) *)
+  let buf_sub ~buf ~off ~len = 
+    Bigstring.sub buf off len
+
   let buf_ops = 
     {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
-     blit;blit_bytes_to_buf;blit_string_to_buf;}
+     blit;blit_bytes_to_buf;blit_string_to_buf;buf_sub}
 
 end
 
@@ -290,6 +310,6 @@ let buf_ops = object
   method abstract_string = Abstract_string.buf_ops
   method bytes           = Bytes_.buf_ops
   method abstract_bytes  = Abstract_bytes.buf_ops
-  method safe_bytes      = Safe_bytes.buf_ops
+  (* method safe_bytes      = Safe_bytes.buf_ops *)
   method ba              = Bigstring_.buf_ops
 end
