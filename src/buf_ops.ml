@@ -63,8 +63,8 @@ module Check_blit(S:sig
     let {off=src_off},{len=src_len},{off=dst_off} = src_off,src_len,dst_off in    
     let len = src_len in
     assert(len>=0 && src_off>=0 && dst_off>=0);
-    assert (src_off + len < len1 src);
-    assert (dst_off + len < len2 dst);
+    assert (src_off + len <= len1 src);
+    assert (dst_off + len <= len2 dst);
     ()
 end
 
