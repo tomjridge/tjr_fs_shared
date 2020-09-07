@@ -6,7 +6,7 @@
 (maintainers          "Tom Ridge <tom.j.ridge@googlemail.com>")
 (source               (github tomjridge/tjr_fs_shared))
 (homepage             https://github.com/tomjridge/tjr_fs_shared)
-(documentation        https://tomjridge.github.io/tjr_fs_shared)
+(documentation        https://tomjridge.github.io/ocamldocs)
 (generate_opam_files  true)
 
 
