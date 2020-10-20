@@ -4,7 +4,7 @@ synopsis: "Shared definitions for filesystem work (lib)"
 maintainer: ["Tom Ridge <tom.j.ridge@googlemail.com>"]
 authors: ["Tom Ridge <tom.j.ridge@googlemail.com>"]
 homepage: "https://github.com/tomjridge/tjr_fs_shared"
-doc: "https://tomjridge.github.io/tjr_fs_shared"
+doc: "https://tomjridge.github.io/ocamldocs"
 bug-reports: "https://github.com/tomjridge/tjr_fs_shared/issues"
 depends: [
   "dune" {>= "2.0"}
