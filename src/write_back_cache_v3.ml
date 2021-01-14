@@ -55,6 +55,8 @@ The operations:
 - clean: get all the dirty entries, and return them, together
   with a fully clean, trimmed, cache; actually, since cleaning a large cache is very expensive, we just return an empty cache for now
 
+- bindings: return all (clean and dirty) bindings
+
 
 $(TODO(""" At the moment, we use the pqwy functional implementation,
    but this is much slower than the imperative version which we should

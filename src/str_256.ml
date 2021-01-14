@@ -20,3 +20,5 @@ include Internal
 let s256_to_string (s:str_256) = (s :> string)
 
 let to_string = s256_to_string
+
+let compare s1 s2 = compare (s256_to_string s1) (s256_to_string s2)
