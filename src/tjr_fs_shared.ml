@@ -52,7 +52,7 @@ let blk_sz_4096 = Blk_sz.blk_sz_4096
 module Blk_ops = Blk_intf.Blk_ops
 type ('blk,'buf) blk_ops = ('blk,'buf) Blk_ops.blk_ops
 
-let blk_ops = Blk_impls.blk_ops
+(* let blk_ops = Blk_impls.blk_ops *)
 
 
 (** {2 Block devices} *)

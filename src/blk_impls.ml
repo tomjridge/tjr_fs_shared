@@ -1,3 +1,5 @@
+(* Prefer to use concrete implementations from shared_ctxt 
+
 (** Implementations of blks; effectively blks are an abstract type
    which we can convert to/from bufs *)
 
@@ -14,3 +16,4 @@ let blk_ops =
           buf)
     }
   end
+*)

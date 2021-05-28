@@ -31,7 +31,9 @@ type 'buf buf_ops = {
   buf_to_string      : src:'buf -> off:offset -> len:len -> string; 
   to_string          : 'buf -> string;
   of_string          : string -> 'buf;
+  to_bytes           : 'buf -> bytes;
   of_bytes           : bytes -> 'buf;
+  of_ba              : Bigstring.t -> 'buf;
 
   buf_sub            : buf:'buf -> off:int -> len:int -> 'buf;
   (* NOTE buf_sub either shares the underlying buf (mutable buffers),
@@ -85,6 +87,10 @@ module String_ = struct
 
   let of_bytes = Bytes.to_string
 
+  let to_bytes = Bytes.of_string
+
+  let of_ba ba = Bigstring.to_string ba
+
   open (Check_blit(struct 
           type t1=bytes type t2=string let len1=Bytes.length let len2=String.length end))
 
@@ -107,10 +113,12 @@ module String_ = struct
 
   let buf_sub ~buf ~off ~len = 
     String.sub buf off len
-  
+
+
   let buf_ops = 
-    {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
+    {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;to_bytes;of_ba;
      blit;blit_bytes_to_buf;blit_string_to_buf;buf_sub}
+
 end
 
 
@@ -141,6 +149,10 @@ module Bytes_ = struct
   let to_string s = B_.to_string s 
 
   let of_bytes = fun bs -> bs
+    
+  let to_bytes = fun bs -> bs
+
+  let of_ba = fun ba -> Bigstring.to_bytes ba
 
   open (Check_blit(struct 
           type t1=bytes type t2=bytes let len1=Bytes.length let len2=Bytes.length end))
@@ -165,7 +177,7 @@ module Bytes_ = struct
     Bytes.sub buf off len
 
   let buf_ops = 
-    {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
+    {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;to_bytes;of_ba;
      blit;blit_bytes_to_buf;blit_string_to_buf;buf_sub}
 
 end
@@ -267,7 +279,11 @@ end*) = struct
 
   let of_string = Bigstring.of_string
 
+  let to_bytes = Bigstring.to_bytes
+
   let of_bytes = Bigstring.of_bytes
+
+  let of_ba = fun x -> x
 
   open (Check_blit(struct 
           type t1=string type t2=t let len1=String.length let len2=Bigstring.length end))
@@ -299,7 +315,7 @@ end*) = struct
     Bigstring.sub buf off len
 
   let buf_ops = 
-    {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;
+    {buf_create;buf_length;buf_get;buf_to_string;of_string;to_string;of_bytes;to_bytes;of_ba;
      blit;blit_bytes_to_buf;blit_string_to_buf;buf_sub}
 
 end

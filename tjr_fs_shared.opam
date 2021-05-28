@@ -16,7 +16,7 @@ depends: [
   "lru"
   "ke"
   "alcotest"
-  "bigstring"
+  "bigstringaf"
 ]
 build: [
   ["dune" "subst"] {pinned}

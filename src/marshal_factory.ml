@@ -25,13 +25,15 @@ module Make_marshaller(X: sig
 = 
 struct
   open X
-  let mshl (x:t) (buf,off) = 
-    bin_write_t buf ~pos:off x |> fun off' -> 
+  let mshl (x:t) ((buf:Shared_ctxt.buf),off) = 
+    assert(buf.is_valid);
+    bin_write_t buf.ba_buf ~pos:off x |> fun off' -> 
     (buf,off')
 
-  let umshl buf off = 
+  let umshl (buf:Shared_ctxt.buf) off = 
+    assert(buf.is_valid);
     let pos_ref = ref off in
-    bin_read_t buf ~pos_ref |> fun r ->
+    bin_read_t buf.ba_buf ~pos_ref |> fun r ->
     (r,!pos_ref)
 
   let mshlr = { max_elt_sz; mshl; umshl }

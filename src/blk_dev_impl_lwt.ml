@@ -15,7 +15,7 @@ open Blk_intf
 (** NOTE lwt uses bytes, but we tend to prefer bigstring for
    integration with FUSE *)
 module With_(S:sig 
-    type blk
+    type blk = Shared_ctxt.blk
     val blk_sz       : blk_sz 
     val bytes_to_blk : bytes -> blk
     val blk_to_bytes : blk -> bytes
@@ -78,7 +78,7 @@ module With_(S:sig
                 write ~blk_id ~blk >>= fun () ->
                 k ws)
 
-      let blk_dev_ops = {
+      let blk_dev_ops : (_,Shared_ctxt.blk,_)blk_dev_ops = {
         blk_sz;
         read;
         write;
@@ -108,16 +108,16 @@ module With_(S:sig
 
 end
 
-let lwt_impl : _ blk_dev_impl = object
+let lwt_impl : (_,Shared_ctxt.blk,_,_) blk_dev_impl = object
   method add_debug=add_debug
   method add_profiling=fun blk_dev_ops -> 
     add_profiling ~monad_ops:With_lwt.monad_ops ~blk_dev_ops
   method with_=fun ~blk_sz -> 
     let module X = With_(struct
-        type blk=Bigstring.t
+        type blk=Shared_ctxt.blk
         let blk_sz=blk_sz
-        let bytes_to_blk=Bigstring.of_bytes
-        let blk_to_bytes=Bigstring.to_bytes
+        let bytes_to_blk=(fun x -> Shared_ctxt.{ba_buf=Bigstring.of_bytes x})
+        let blk_to_bytes=(fun (x:Shared_ctxt.blk) -> Bigstring.to_bytes x.Shared_ctxt.ba_buf)
       end)
     in
     object 

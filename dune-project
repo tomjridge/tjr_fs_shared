@@ -22,7 +22,7 @@
    lru ; for caching
    ke ; for functional queues
    alcotest ; for testing
-   bigstring ; buffers, blocks
+   bigstringaf ; buffers, blocks
 ))
 
 
