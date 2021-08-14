@@ -1,5 +1,0 @@
-(library
-  (name tjr_fs_shared_examples)
-  (public_name tjr_fs_shared_examples)
-
-  (libraries tjr_fs_shared))

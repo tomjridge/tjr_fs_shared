@@ -1,7 +1,0 @@
-(executable
- (public_name "test_fs_shared")
- (package tjr_fs_shared) ; this is ok, even if it depends on tjr_fs_shared lib
- (flags (:standard -open Tjr_lib_core -open Tjr_lib -open Tjr_fs_shared))
- (libraries "tjr_fs_shared"))
-
-
