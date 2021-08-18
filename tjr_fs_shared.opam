@@ -8,7 +8,6 @@ doc: "https://tomjridge.github.io/ocamldocs"
 bug-reports: "https://github.com/tomjridge/tjr_fs_shared/issues"
 depends: [
   "dune" {>= "2.0"}
-  "tjr_lib"
   "tjr_monad"
   "tjr_profile"
   "ppx_jane"

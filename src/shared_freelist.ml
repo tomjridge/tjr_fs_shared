@@ -88,7 +88,7 @@ module Example = struct
             return to_return)
       in
       let alloc_many n = 
-        (0,[]) |> iter_k (fun ~k (i,xs) -> 
+        (0,[]) |> Util.iter_k (fun ~k (i,xs) -> 
             match i>=n with
             | true -> return xs
             | false -> 
@@ -228,7 +228,7 @@ module Test() = struct
       x#restore () >>= fun y -> 
       assert(y#get_state () = { min_free=4;last=4 });
       y#freelist_ops.alloc_many 1000 >>= fun xs -> 
-      assert(List.rev xs=(List_.from_upto 4 (4+1000) |> List.map B.of_int));
+      assert(List.rev xs=(Util.from_upto 4 (4+1000) |> List.map B.of_int));
       y#get_state () |> fun s -> 
       (* NOTE the following depend on delta=1000 *)
       assert(s.min_free=4+1000); 

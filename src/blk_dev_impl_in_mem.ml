@@ -19,7 +19,7 @@ let make_blk_dev_in_mem ~monad_ops ~blk_sz ~with_state =
         return (Tjr_map.With_stdcmp.find blk_id s))
   in
   let write_many writes = 
-    writes |> iter_k (fun ~k ws -> match ws with
+    writes |> Util.iter_k (fun ~k ws -> match ws with
         | [] -> return ()
         | (blk_id,blk)::ws -> 
           write ~blk_id ~blk >>= fun () -> 

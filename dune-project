@@ -14,7 +14,6 @@
  (name tjr_fs_shared)
  (synopsis "Shared definitions for filesystem work (lib)")
  (depends 
-   tjr_lib
    tjr_monad
    tjr_profile
    ppx_jane ; optcomp

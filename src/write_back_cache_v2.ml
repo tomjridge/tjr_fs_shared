@@ -45,6 +45,7 @@ module Make(K:Stdlib.Map.OrderedType)(V:sig type t end) = struct
   module V' = struct type t = V.t * bool end
 
   module Lru = Tjr_lru.Make_lru(K)(V')
+  open Tjr_lru
 
   let _lru_ops : (K.t,V.t*bool,Lru.Internal.t) lru_ops = Lru.lru_ops
 

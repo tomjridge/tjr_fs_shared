@@ -142,7 +142,7 @@ module Pvt_make(K:K)(V:V) = struct
       let needs_trim t = size t > cap+delta
 
       let trim t = 
-        (t,size t,[]) |> iter_k (fun ~k:kont (t,sz,acc) -> 
+        (t,size t,[]) |> Util.iter_k (fun ~k:kont (t,sz,acc) -> 
             match sz <= cap with
             | true -> (acc,t)
             | false -> 

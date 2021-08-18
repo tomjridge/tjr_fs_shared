@@ -33,7 +33,7 @@ NOTE: for insert and delete operations, we typically expect that any
 existing v binding is not dirty, but this is not checked at runtime
 
 *)
-
+open Util
 
 type ('k,'v,'a,'t) write_back_cache_ops = {
   find             : 'k -> 't -> ('v * bool) option;

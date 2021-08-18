@@ -31,7 +31,8 @@ and
 | Dependency                                          | Comment                                                  |
 | --------------------------------------------------- | -------------------------------------------------------- |
 | bin_prot; ppx_bin_prot; yojson; ppx_deriving_yojson |                                                          |
-| tjr_lib                                             |                                                          |
 | tjr_monad                                           | So we don't have to explicit include in later libraries. |
+| tjr_profile                                         | Profiling                                                |
+
 
 

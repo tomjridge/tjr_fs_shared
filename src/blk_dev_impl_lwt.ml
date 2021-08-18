@@ -10,6 +10,7 @@ NOTE don't access this directly; used blk_devs#lwt instead.
 
 *)
 
+open Util
 open Blk_intf
 
 (** NOTE lwt uses bytes, but we tend to prefer bigstring for

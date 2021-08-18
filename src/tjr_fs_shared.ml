@@ -5,6 +5,8 @@ A collection of the main types provided by this library. *)
 include Summary
 
 
+include Util
+
 (** {2 Int-like types} *)
 
 module Int_like = Int_like
