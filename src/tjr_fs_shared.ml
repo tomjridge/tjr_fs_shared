@@ -7,6 +7,8 @@ include Summary
 
 include Util
 
+module Tjr_map = Tjr_map
+
 (** {2 Int-like types} *)
 
 module Int_like = Int_like

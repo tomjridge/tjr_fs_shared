@@ -9,3 +9,7 @@ let from_upto l h =
 
 let file_exists fn = 
   try ignore (Unix.stat fn : Unix.stats); true with _ -> false
+
+let dest_Some = function
+  | None -> failwith "dest_Some"
+  | Some x -> x
