@@ -8,6 +8,9 @@ include Summary
 include Util
 
 module Tjr_map = Tjr_map
+module Tjr_config = Tjr_config 
+module Tjr_lib_log = Tjr_lib_log
+module Tjr_lru = Tjr_lru
 
 (** {2 Int-like types} *)
 
@@ -274,6 +277,7 @@ module Test = Test
 
 module Log = Log
 
+let (log_now,log_error,log_lazy) = Log.(log_now,log_error,log_lazy)
 
 (** {2 Runtime config support} *)
 
