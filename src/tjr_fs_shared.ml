@@ -9,7 +9,6 @@ include Util
 
 module Tjr_map = Tjr_map
 module Tjr_config = Tjr_config 
-module Tjr_lib_log = Tjr_lib_log
 module Tjr_lru = Tjr_lru
 
 (** {2 Int-like types} *)
