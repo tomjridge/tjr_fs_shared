@@ -11,6 +11,10 @@ module Tjr_map = Tjr_map
 module Tjr_config = Tjr_config 
 module Tjr_lru = Tjr_lru
 
+(** {2 Simple types} *)
+
+module Times = Times
+
 (** {2 Int-like types} *)
 
 module Int_like = Int_like
