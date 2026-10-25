@@ -16,12 +16,18 @@
  (depends 
    tjr_monad
    tjr_profile
-   ppx_jane ; optcomp
+   ppx_jane
+   ppx_optcomp
+   ppx_bin_prot
+   ppx_deriving_yojson
+   yojson
+   bin_prot
    lwt ; for lwt block device
    lru ; for caching
    ke ; for functional queues
    alcotest ; for testing
-   bigstringaf ; buffers, blocks
+   bigstring ; buffers, blocks
+   logs ; logging
 ))
 
 

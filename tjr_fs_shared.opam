@@ -11,11 +11,17 @@ depends: [
   "tjr_monad"
   "tjr_profile"
   "ppx_jane"
+  "ppx_optcomp"
+  "ppx_bin_prot"
+  "ppx_deriving_yojson"
+  "yojson"
+  "bin_prot"
   "lwt"
   "lru"
   "ke"
   "alcotest"
-  "bigstringaf"
+  "bigstring"
+  "logs"
 ]
 build: [
   ["dune" "subst"] {pinned}
